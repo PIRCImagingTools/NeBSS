@@ -1,0 +1,6 @@
+include neoseg_gui README LICENSE CHANGES
+include NeoSeg/res/*
+include NeoSeg/res/Albert/segmentations/*
+include NeoSeg/res/Albert/volumes/*
+include NeoSeg/ui/*
+
