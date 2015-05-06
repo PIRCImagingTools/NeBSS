@@ -1,6 +1,6 @@
 import nipype.interfaces.io as nio
 import nipype.interfaces.fsl as fsl
-import nipype.interface.ants as ants
+import nipype.interfaces.ants as ants
 import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as util
 import os,json, sys
@@ -72,7 +72,8 @@ FastSeg.inputs.output_biascorrected = True
 FastSeg.inputs.img_type = 2
 
 
-get_T2_template= pe.Node(interface=fsl.ExtractROI(), name = 'get_T2_template')
+get_T2_template= pe.Node(interface=fsl.ExtractROI(),
+                         name = 'get_T2_template')
 #extract_b0.inputs.t_min = 0
 get_T2_template.inputs.t_size = 1
 get_T2_template.inputs.in_file = T2_Template
@@ -90,11 +91,11 @@ T2linTemplate.inputs.searchr_z = [-180, 180]
 #T2warpTemplate.inputs.config_file=configfile
 
 
-T2warpTemplate=pe.Node(interface=ants.Registration(), name='T2warpTemplate')
+T2warpTemplate=pe.Node(interface=ants.ANTS(), name='T2warpTemplate')
 T2warpTemplate.inputs.dimension=3
 T2warpTemplate.inputs.metric=['CC',]
 T2warpTemplate.inputs.metric_weight=[1.0,]
-T2warpTemplate.inputs.radius=[5.0,]
+T2warpTemplate.inputs.radius=[5,]
 T2warpTemplate.inputs.output_transform_prefix='ANTS_OUT'
 T2warpTemplate.inputs.transformation_model='SyN'
 T2warpTemplate.inputs.gradient_step_length=0.25
@@ -105,12 +106,15 @@ T2warpTemplate.inputs.regularization='Gauss'
 T2warpTemplate.inputs.regularization_gradient_field_sigma=3
 T2warpTemplate.inputs.regularization_deformation_field_sigma=0
 
-#inverse_T2_warp=pe.Node(interface=tools.InvWarp(), name='inverse_T2_warp')
+
+T2_warp_to_standard=pe.MapNode(interface=ants.WarpImageMultiTransform(),
+                               name='T2_warp_to_standard',
+                               iterfield=['input_image'])
 
 
-apply_T2_warp=pe.MapNode(interface=ants.WarpImageMultiTransform(), name='apply_T2_warp',
+apply_T2_warp=pe.MapNode(interface=ants.WarpImageMultiTransform(),
+                         name='apply_T2_warp',
                          iterfield=['input_image'])
-#apply_T2_warp.inputs.interp='nn'
 
 
 get_masks = pe.MapNode(interface=fsl.ExtractROI(), name = 'get_masks',
@@ -188,11 +192,13 @@ albert_lin.inputs.searchr_z = [-180, 180]
 #albert_warp.inputs.field_file=True
 #albert_warp.inputs.config_file=albert_config
 
-albert_warp=pe.MapNode(interface=ants.Registration(), name='albert_warp', iterfield=['moving_image'])
+albert_warp=pe.MapNode(interface=ants.ANTS(),
+                       name='albert_warp',
+                       iterfield=['moving_image'])
 albert_warp.inputs.dimension=3
 albert_warp.inputs.metric=['CC',]
 albert_warp.inputs.metric_weight=[1.0,]
-albert_warp.inputs.radius=[5.0,]
+albert_warp.inputs.radius=[5,]
 albert_warp.inputs.output_transform_prefix='ANTS_OUT'
 albert_warp.inputs.transformation_model='SyN'
 albert_warp.inputs.gradient_step_length=0.25
@@ -202,13 +208,10 @@ albert_warp.inputs.number_of_iterations=[100,100,100,50]
 albert_warp.inputs.regularization='Gauss'
 albert_warp.inputs.regularization_gradient_field_sigma=3
 albert_warp.inputs.regularization_deformation_field_sigma=0
-albert_warp
 
-#apply_albert_warp=pe.MapNode(interface=fsl.ApplyWarp(), name='apply_albert_warp',
-#                         iterfield=['in_file', 'field_file'])
-#apply_albert_warp.inputs.interp='nn'
-apply_albert_warp=pe.MapNode(interface=ants.WarpImageMultiTransform(), name='apply_albert_warp',
-                         iterfield=['input_image','transformation_series'])
+apply_albert_warp=pe.MapNode(interface=ants.WarpImageMultiTransform(),
+                             name='apply_albert_warp',
+                             iterfield=['input_image','transformation_series'])
 
 
 AlbertSeg = pe.Workflow(name='AlbertSeg')
@@ -216,7 +219,7 @@ AlbertSeg.base_dir = parent_dir+'/SegT2'
 AlbertSeg.connect([
                 (get_albert_list, albert_lin, [('albert_list','in_file')]),
                     (albert_lin, albert_warp, [('out_file','moving_image')]),
-             (albert_warp, apply_albert_warp, [('forward_transforms','trasnformation_series')]),
+             (albert_warp, apply_albert_warp, [('warp_transform','trasnformation_series')]),
           (get_albert_seg, apply_albert_warp, [('seg_list', 'input_image')])
 ])
 
@@ -242,22 +245,25 @@ SegT2.connect([
                   (FastSeg, T2linTemplate, [('restored_image', 'in_file')]),
      (get_template_index, get_T2_template, [('index', 't_min')]),
           (get_T2_template, T2linTemplate, [('roi_file', 'reference')]),
-                 (FastSeg, T2warpTemplate, [('restored_image', 'moving_image')]),
-           (T2linTemplate, T2warpTemplate, [('out_file', 'in_file')]),
+           (T2linTemplate, T2warpTemplate, [('out_file', 'moving_image')]),
          (get_T2_template, T2warpTemplate, [('roi_file', 'fixed_image')]),
            (get_template_index, get_masks, [('index', 't_min')]),
-                (get_masks, apply_T2_warp, [('roi_file', 'in_file')]),
-           (T2warpTemplate, apply_T2_warp, [('reverse_transfomr', 'transformation_series')]),
+                (get_masks, apply_T2_warp, [('roi_file', 'input_image')]),
+           (T2warpTemplate, apply_T2_warp, [('inverse_warp_transform',
+                                                    'transformation_series')]),
                   (FastSeg, apply_T2_warp, [('restored_image', 'reference_image')]),
                       (FastSeg, AlbertSeg, [('restored_image','albert_lin.reference')]),
                       (FastSeg, AlbertSeg, [('restored_image','albert_warp.fixed_image')]),
-                      (FastSeg, AlbertSeg, [('restored_image','apply_albert_warp.reference_image')]),
-                (T2warpTemplate, datasink, [('output_image', 'T2_Standard_Space.@T2W')]),
+                      (FastSeg, AlbertSeg, [('restored_image',
+                                                     'apply_albert_warp.reference_image')]),
+            (FastSeg, T2_warp_to_standard, [('restored_image', 'input_image')]),
+           (T2_warp_to_standard, datasink, [('output_image', 'T2_Standard_Space.@T2W')]),
                        (FastSeg, datasink, [('partial_volume_files', 'Fast_PVE.@FPVE')]),
                  (apply_T2_warp, datasink, [('output_image', 'T2_Tissue_Classes.@T2TC')]),
                        (FastSeg, datasink, [('restored_image',
                                                     'T2_Bias_Corrected.@T2B')]),
-                     (AlbertSeg, datasink, [('apply_albert_warp.out_file', 'Reg_Alberts.@MA')])
+                     (AlbertSeg, datasink, [('apply_albert_warp.output_image',
+                                                                'Reg_Alberts.@MA')])
                                 ])
 
 from nipype.interfaces.fsl import ImageStats,Merge
