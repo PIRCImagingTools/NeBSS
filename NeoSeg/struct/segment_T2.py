@@ -113,17 +113,20 @@ T2warpTemplate.inputs.metric_weight=[1.0,]
 T2warpTemplate.inputs.radius=[2,]
 T2warpTemplate.inputs.output_transform_prefix='ANTS_OUT'
 T2warpTemplate.inputs.transformation_model='SyN'
-T2warpTemplate.inputs.gradient_step_length=0.2
+T2warpTemplate.inputs.gradient_step_length=0.8
 T2warpTemplate.inputs.number_of_time_steps=2
-T2warpTemplate.inputs.delta_time=0.01
-T2warpTemplate.inputs.number_of_iterations=[5,4,3,1]
+T2warpTemplate.inputs.delta_time=0.02
+T2warpTemplate.inputs.number_of_iterations=[2,2,2,1]
 T2warpTemplate.inputs.regularization='Gauss'
 T2warpTemplate.inputs.regularization_gradient_field_sigma=3
 T2warpTemplate.inputs.regularization_deformation_field_sigma=0
 
-T2_warp_to_standard=pe.MapNode(interface=ants.WarpImageMultiTransform(),
-                               name='T2_warp_to_standard',
-                               iterfield=['input_image'])
+T2warpTemplate.config = {'execution':
+                         {'remove_unnuecessary_outputs' : False}
+                         }
+
+T2_warp_to_standard=pe.Node(interface=ants.WarpImageMultiTransform(),
+                               name='T2_warp_to_standard')
 
 
 apply_T2_warp=pe.MapNode(interface=ants.WarpImageMultiTransform(),
@@ -231,16 +234,20 @@ albert_warp=pe.MapNode(interface=ants.ANTS(),
 albert_warp.inputs.dimension=3
 albert_warp.inputs.metric=['CC',]
 albert_warp.inputs.metric_weight=[1.0,]
-albert_warp.inputs.radius=[3,]
+albert_warp.inputs.radius=[2,]
 albert_warp.inputs.output_transform_prefix='ANTS_OUT'
 albert_warp.inputs.transformation_model='SyN'
-albert_warp.inputs.gradient_step_length=0.2
-albert_warp.inputs.number_of_time_steps=1
+albert_warp.inputs.gradient_step_length=0.8
+albert_warp.inputs.number_of_time_steps=2
 albert_warp.inputs.delta_time=0.01
-albert_warp.inputs.number_of_iterations=[5,4,3,2]
+albert_warp.inputs.number_of_iterations=[2,2,2,2]
 albert_warp.inputs.regularization='Gauss'
 albert_warp.inputs.regularization_gradient_field_sigma=3
 albert_warp.inputs.regularization_deformation_field_sigma=0
+
+albert_warp.config = {'execution':
+                         {'remove_unnuecessary_outputs' : False}
+                         }
 
 apply_albert_warp=pe.MapNode(interface=ants.WarpImageMultiTransform(),
                              name='apply_albert_warp',
@@ -252,7 +259,7 @@ AlbertSeg.base_dir = parent_dir+'/SegT2'
 AlbertSeg.connect([
                 (get_albert_list, albert_lin, [('albert_list','in_file')]),
                     (albert_lin, albert_warp, [('out_file','moving_image')]),
-             (albert_warp, apply_albert_warp, [('warp_transform','trasnformation_series')]),
+             (albert_warp, apply_albert_warp, [('warp_transform','transformation_series')]),
           (get_albert_seg, apply_albert_warp, [('seg_list', 'input_image')])
 ])
 
@@ -290,6 +297,8 @@ SegT2.connect([
                       (FastSeg, AlbertSeg, [('restored_image',
                                                      'apply_albert_warp.reference_image')]),
             (FastSeg, T2_warp_to_standard, [('restored_image', 'input_image')]),
+     (T2warpTemplate, T2_warp_to_standard, [('warp_transform',
+                                                          'transformation_series')]),
            (T2_warp_to_standard, datasink, [('output_image', 'T2_Standard_Space.@T2W')]),
                        (FastSeg, datasink, [('partial_volume_files', 'Fast_PVE.@FPVE')]),
                  (apply_T2_warp, datasink, [('output_image', 'T2_Tissue_Classes.@T2TC')]),

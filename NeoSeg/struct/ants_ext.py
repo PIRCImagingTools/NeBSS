@@ -67,11 +67,16 @@ class ANTSInputSpec(ANTSCommandInputSpec):
 
 class ANTSOutputSpec(TraitedSpec):
     affine_transform = File(exists=True, desc='Affine transform file')
-    warp_transform = File(exists=True, desc='Warping deformation field')
-    inverse_warp_transform = File(
-        exists=True, desc='Inverse warping deformation field')
-    metaheader = File(exists=True, desc='VTK metaheader .mhd file')
-    metaheader_raw = File(exists=True, desc='VTK metaheader .raw file')
+    warp_transform = File(desc='Warping deformation field')
+    warp_transform_x = File(exists=True, desc='X Component of warp field')
+    warp_transform_y = File(exists=True, desc='Y Component of warp field')
+    warp_transform_z = File(exists=True, desc='Z Component of warp field')
+    inverse_warp_transform = File(desc='Inverse warping deformation field')
+    inverse_warp_transform_x = File(exists=True, desc='X Component of inverse warp field')
+    inverse_warp_transform_y = File(exists=True, desc='Y Component of inverse warp field')
+    inverse_warp_transform_z = File(exists=True, desc='Z Component of inverse warp field')
+    #metaheader = File(exists=True, desc='VTK metaheader .mhd file')
+    #metaheader_raw = File(exists=True, desc='VTK metaheader .raw file')
 
 
 class ANTS(ANTSCommand):
@@ -187,8 +192,20 @@ class ANTS(ANTSCommand):
             self.inputs.output_transform_prefix + 'Affine.txt')
         outputs['warp_transform'] = os.path.abspath(
             self.inputs.output_transform_prefix + 'Warp.nii.gz')
+        outputs['warp_transform_x'] = os.path.abspath(
+            self.inputs.output_transform_prefix + 'Warpxvec.nii.gz')
+        outputs['warp_transform_y'] = os.path.abspath(
+            self.inputs.output_transform_prefix + 'Warpyvec.nii.gz')
+        outputs['warp_transform_z'] = os.path.abspath(
+            self.inputs.output_transform_prefix + 'Warpzvec.nii.gz')
         outputs['inverse_warp_transform'] = os.path.abspath(
             self.inputs.output_transform_prefix + 'InverseWarp.nii.gz')
+        outputs['inverse_warp_transform_x'] = os.path.abspath(
+            self.inputs.output_transform_prefix + 'InverseWarpxvec.nii.gz')
+        outputs['inverse_warp_transform_y'] = os.path.abspath(
+            self.inputs.output_transform_prefix + 'InverseWarpyvec.nii.gz')
+        outputs['inverse_warp_transform_z'] = os.path.abspath(
+            self.inputs.output_transform_prefix + 'InverseWarpzvec.nii.gz')
         #outputs['metaheader'] = os.path.abspath(self.inputs.output_transform_prefix + 'velocity.mhd')
         #outputs['metaheader_raw'] = os.path.abspath(self.inputs.output_transform_prefix + 'velocity.raw')
         return outputs
@@ -219,7 +236,7 @@ class WarpImageMultiTransformInputSpec(ANTSCommandInputSpec):
                               desc='Use nearest neighbor interpolation')
     use_bspline = traits.Bool(argstr='--use-BSpline',
                               desc='Use 3rd order B-Spline interpolation')
-    transformation_series = InputMultiPath(File(exists=True), argstr='%s',
+    transformation_series = InputMultiPath(argstr='%s',
                                            desc='transformation file(s) to be applied',
                                            mandatory=True, position=-1)
     invert_affine = traits.List(traits.Int,
