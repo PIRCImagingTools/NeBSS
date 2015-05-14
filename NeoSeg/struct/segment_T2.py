@@ -1,6 +1,6 @@
 import nipype.interfaces.io as nio
 import nipype.interfaces.fsl as fsl
-import nipype.interfaces.ants as ants
+import  ants_ext as ants
 import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as util
 import os,json, sys
@@ -80,7 +80,6 @@ get_T2_template.inputs.in_file = T2_Template
 
 
 T2linTemplate = pe.Node(interface=fsl.FLIRT(), name='T2linTemplate')
-#T2linTemplate.inputs.reference=Template
 T2linTemplate.inputs.dof = 12
 T2linTemplate.inputs.searchr_x = [-180, 180]
 T2linTemplate.inputs.searchr_y = [-180, 180]
@@ -90,22 +89,37 @@ T2linTemplate.inputs.searchr_z = [-180, 180]
 #T2warpTemplate.inputs.field_file=True
 #T2warpTemplate.inputs.config_file=configfile
 
+#### REAL PARAMETERS
+#T2warpTemplate=pe.Node(interface=ants.ANTS(), name='T2warpTemplate')
+#T2warpTemplate.inputs.dimension=3
+#T2warpTemplate.inputs.metric=['CC',]
+#T2warpTemplate.inputs.metric_weight=[1.0,]
+#T2warpTemplate.inputs.radius=[10,]
+#T2warpTemplate.inputs.output_transform_prefix='ANTS_OUT'
+#T2warpTemplate.inputs.transformation_model='SyN'
+#T2warpTemplate.inputs.gradient_step_length=0.25
+#T2warpTemplate.inputs.number_of_time_steps=2
+#T2warpTemplate.inputs.delta_time=0.01
+#T2warpTemplate.inputs.number_of_iterations=[100,100,100,50]
+#T2warpTemplate.inputs.regularization='Gauss'
+#T2warpTemplate.inputs.regularization_gradient_field_sigma=3
+#T2warpTemplate.inputs.regularization_deformation_field_sigma=0
 
+### TEST PARAMETERS
 T2warpTemplate=pe.Node(interface=ants.ANTS(), name='T2warpTemplate')
 T2warpTemplate.inputs.dimension=3
 T2warpTemplate.inputs.metric=['CC',]
 T2warpTemplate.inputs.metric_weight=[1.0,]
-T2warpTemplate.inputs.radius=[5,]
+T2warpTemplate.inputs.radius=[2,]
 T2warpTemplate.inputs.output_transform_prefix='ANTS_OUT'
 T2warpTemplate.inputs.transformation_model='SyN'
-T2warpTemplate.inputs.gradient_step_length=0.25
+T2warpTemplate.inputs.gradient_step_length=0.2
 T2warpTemplate.inputs.number_of_time_steps=2
 T2warpTemplate.inputs.delta_time=0.01
-T2warpTemplate.inputs.number_of_iterations=[100,100,100,50]
+T2warpTemplate.inputs.number_of_iterations=[5,4,3,1]
 T2warpTemplate.inputs.regularization='Gauss'
 T2warpTemplate.inputs.regularization_gradient_field_sigma=3
 T2warpTemplate.inputs.regularization_deformation_field_sigma=0
-
 
 T2_warp_to_standard=pe.MapNode(interface=ants.WarpImageMultiTransform(),
                                name='T2_warp_to_standard',
@@ -192,19 +206,38 @@ albert_lin.inputs.searchr_z = [-180, 180]
 #albert_warp.inputs.field_file=True
 #albert_warp.inputs.config_file=albert_config
 
+#### REAL PARAMETERS
+#albert_warp=pe.MapNode(interface=ants.ANTS(),
+#                       name='albert_warp',
+#                       iterfield=['moving_image'])
+#albert_warp.inputs.dimension=3
+#albert_warp.inputs.metric=['CC',]
+#albert_warp.inputs.metric_weight=[1.0,]
+#albert_warp.inputs.radius=[10,]
+#albert_warp.inputs.output_transform_prefix='ANTS_OUT'
+#albert_warp.inputs.transformation_model='SyN'
+#albert_warp.inputs.gradient_step_length=0.5
+#albert_warp.inputs.number_of_time_steps=5
+#albert_warp.inputs.delta_time=0.01
+#albert_warp.inputs.number_of_iterations=[100,100,100,50]
+#albert_warp.inputs.regularization='Gauss'
+#albert_warp.inputs.regularization_gradient_field_sigma=3
+#albert_warp.inputs.regularization_deformation_field_sigma=0
+
+#### TEST PARAMETERS
 albert_warp=pe.MapNode(interface=ants.ANTS(),
                        name='albert_warp',
                        iterfield=['moving_image'])
 albert_warp.inputs.dimension=3
 albert_warp.inputs.metric=['CC',]
 albert_warp.inputs.metric_weight=[1.0,]
-albert_warp.inputs.radius=[5,]
+albert_warp.inputs.radius=[3,]
 albert_warp.inputs.output_transform_prefix='ANTS_OUT'
 albert_warp.inputs.transformation_model='SyN'
-albert_warp.inputs.gradient_step_length=0.25
-albert_warp.inputs.number_of_time_steps=2
+albert_warp.inputs.gradient_step_length=0.2
+albert_warp.inputs.number_of_time_steps=1
 albert_warp.inputs.delta_time=0.01
-albert_warp.inputs.number_of_iterations=[100,100,100,50]
+albert_warp.inputs.number_of_iterations=[5,4,3,2]
 albert_warp.inputs.regularization='Gauss'
 albert_warp.inputs.regularization_gradient_field_sigma=3
 albert_warp.inputs.regularization_deformation_field_sigma=0
