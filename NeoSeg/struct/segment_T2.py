@@ -125,14 +125,27 @@ T2warpTemplate.config = {'execution':
                          {'remove_unnuecessary_outputs' : False}
                          }
 
+def agg_transforms(warp, affine):
+    return [warp, affine]
+
 T2_warp_to_standard=pe.Node(interface=ants.WarpImageMultiTransform(),
                                name='T2_warp_to_standard')
+
+
+T2_warp_to_standard_agg = pe.Node(name='T2_warp_to_standard_agg',
+                    interface = util.Function(input_names=['warp','affine'],
+                                         output_names=['trans_series'],
+                                         function = agg_transforms))
 
 
 apply_T2_warp=pe.MapNode(interface=ants.WarpImageMultiTransform(),
                          name='apply_T2_warp',
                          iterfield=['input_image'])
 
+apply_T2_warp_agg = pe.Node(name='apply_T2_warp_agg',
+                    interface = util.Function(input_names=['warp','affine'],
+                                         output_names=['trans_series'],
+                                         function = agg_transforms))
 
 get_masks = pe.MapNode(interface=fsl.ExtractROI(), name = 'get_masks',
                               iterfield=['in_file'])
@@ -253,13 +266,20 @@ apply_albert_warp=pe.MapNode(interface=ants.WarpImageMultiTransform(),
                              name='apply_albert_warp',
                              iterfield=['input_image','transformation_series'])
 
+apply_albert_warp_agg = pe.Node(name='apply_albert_warp_agg',
+                    interface = util.Function(input_names=['warp','affine'],
+                                         output_names=['trans_series'],
+                                         function = agg_transforms))
+
 
 AlbertSeg = pe.Workflow(name='AlbertSeg')
 AlbertSeg.base_dir = parent_dir+'/SegT2'
 AlbertSeg.connect([
                 (get_albert_list, albert_lin, [('albert_list','in_file')]),
                     (albert_lin, albert_warp, [('out_file','moving_image')]),
-             (albert_warp, apply_albert_warp, [('warp_transform','transformation_series')]),
+         (albert_warp, apply_albert_warp_agg, [('warp_transform', 'warp'),
+                                               ('affine_transform', 'affine')]),
+   (apply_albert_warp_agg, apply_albert_warp, [('trans_series','transformation_series')]),
           (get_albert_seg, apply_albert_warp, [('seg_list', 'input_image')])
 ])
 
@@ -288,16 +308,20 @@ SegT2.connect([
            (T2linTemplate, T2warpTemplate, [('out_file', 'moving_image')]),
          (get_T2_template, T2warpTemplate, [('roi_file', 'fixed_image')]),
            (get_template_index, get_masks, [('index', 't_min')]),
+       (T2warpTemplate, apply_T2_warp_agg, [('inverse_warp_transform', 'warp'),
+                                            ('affine_transform', 'affine')]),
+        (apply_T2_warp_agg, apply_T2_warp, [('trans_series', 'transformation_series')]),
                 (get_masks, apply_T2_warp, [('roi_file', 'input_image')]),
-           (T2warpTemplate, apply_T2_warp, [('inverse_warp_transform',
-                                                    'transformation_series')]),
                   (FastSeg, apply_T2_warp, [('restored_image', 'reference_image')]),
                       (FastSeg, AlbertSeg, [('restored_image','albert_lin.reference')]),
                       (FastSeg, AlbertSeg, [('restored_image','albert_warp.fixed_image')]),
                       (FastSeg, AlbertSeg, [('restored_image',
                                                      'apply_albert_warp.reference_image')]),
             (FastSeg, T2_warp_to_standard, [('restored_image', 'input_image')]),
-     (T2warpTemplate, T2_warp_to_standard, [('warp_transform', 'transformation_series')]),
+ (T2warpTemplate, T2_warp_to_standard_agg, [('warp_transform', 'warp'),
+                                            ('affine_transform', 'affine')]),
+(T2_warp_to_standard_agg,
+                      T2_warp_to_standard, [('trans_series', 'transformation_series')]),
                 (T2warpTemplate, datasink, [('warp_transform_x','T2WarpTemplate.@std_transform_x'),
                                             ('warp_transform_y','T2WarpTemplate.@std_transform_y'),
                                             ('warp_transform_z','T2WarpTemplate.@std_transform_z'),
