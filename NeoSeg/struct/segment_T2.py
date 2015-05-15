@@ -41,7 +41,7 @@ T2_Template =os.path.abspath(local_path+'/../res/NeonatalAtlas2/template_T2.nii.
 tissuelist = ['brainstem.nii.gz', 'cerebellum.nii.gz',
               'cortex.nii.gz', 'csf.nii.gz', 'dgm.nii.gz',
               'wm.nii.gz', 'brainmask.nii.gz',
-              'ivcsf.nii.gz','stcsf.nii.gz', 'itcsf.nii.gz']
+              'itcsf.nii.gz','ivcsf.nii.gz','stcsf.nii.gz']
 
 TissueList = [os.path.abspath(local_path+'/../res/NeonatalAtlas2/') +'/'+
                tissue for tissue in tissuelist]
@@ -268,10 +268,10 @@ AlbertSeg.connect([
 datasink = pe.Node(interface=nio.DataSink(), name='datasink')
 datasink.inputs.base_directory = parent_dir+'/SegT2/Outputs'
 datasink.inputs.substitutions = [('_apply_T2_warp', ''),
-                                 ('_roi_reoriented_brain_restore_warped', '_T2_StdSpace'),
+                                 ('_roi_reoriented_brain_restore_wimt', '_T2_StdSpace'),
                                  ('_roi_reoriented_brain_restore','_T2_Bias_Corrected'),
                                  ('_roi_reoriented_brain_pve', 'pve'),
-                                 ('_roi_warp', ''),
+                                 ('_roi_wimt', ''),
                                  ('_apply_albert_warp','')]
 
 
@@ -297,8 +297,22 @@ SegT2.connect([
                       (FastSeg, AlbertSeg, [('restored_image',
                                                      'apply_albert_warp.reference_image')]),
             (FastSeg, T2_warp_to_standard, [('restored_image', 'input_image')]),
-     (T2warpTemplate, T2_warp_to_standard, [('warp_transform',
-                                                          'transformation_series')]),
+     (T2warpTemplate, T2_warp_to_standard, [('warp_transform', 'transformation_series')]),
+                (T2warpTemplate, datasink, [('warp_transform_x','T2WarpTemplate.@std_transform_x'),
+                                            ('warp_transform_y','T2WarpTemplate.@std_transform_y'),
+                                            ('warp_transform_z','T2WarpTemplate.@std_transform_z'),
+                                            ('inverse_warp_transform_x','T2WarpTemplate.@std_inv_transform_x'),
+                                            ('inverse_warp_transform_y','T2WarpTemplate.@std_inv_transform_y'),
+                                            ('inverse_warp_transform_z','T2WarpTemplate.@std_inv_transform_z')]),
+                     (AlbertSeg, datasink, [('albert_warp.warp_transform_x','T2WarpTemplate.@albert_transform_x'),
+                                            ('albert_warp.warp_transform_y','T2WarpTemplate.@albert_transform_y'),
+                                            ('albert_warp.warp_transform_z','T2WarpTemplate.@albert_transform_z'),
+                                            ('albert_warp.inverse_warp_transform_x',
+                                                            'T2WarpTemplate.@albert_inv_transform_x'),
+                                            ('albert_warp.inverse_warp_transform_y',
+                                                            'T2WarpTemplate.@albert_inv_transform_y'),
+                                            ('albert_warp.inverse_warp_transform_z',
+                                                            'T2WarpTemplate.@albert_inv_transform_z')]),
            (T2_warp_to_standard, datasink, [('output_image', 'T2_Standard_Space.@T2W')]),
                        (FastSeg, datasink, [('partial_volume_files', 'Fast_PVE.@FPVE')]),
                  (apply_T2_warp, datasink, [('output_image', 'T2_Tissue_Classes.@T2TC')]),
@@ -334,12 +348,13 @@ def output_volume(parent_dir, pid, con):
     csf_vol = get_volume(mskdir+'3/csf.nii.gz')
     dgm_vol = get_volume(mskdir+'4/dgm.nii.gz')
     wm_vol = get_volume(mskdir+'5/wm.nii.gz')
-    x_itcsf = get_volume(mskdir+'6/x_itcsf.nii.gz')
-    x_ivcsf = get_volume(mskdir+'7/x_ivcsf.nii.gz')
-    x_stcsf = get_volume(mskdir+'8/x_stcsf.nii.gz')
+    brain_vol = get_volume(mskdir+'6/brainmask.nii.gz')
+    x_itcsf = get_volume(mskdir+'7/itcsf.nii.gz')
+    x_ivcsf = get_volume(mskdir+'8/ivcsf.nii.gz')
+    x_stcsf = get_volume(mskdir+'9/stcsf.nii.gz')
 
     return [con, bs_vol, cb_vol, ctx_vol,
-            csf_vol, dgm_vol, wm_vol,
+            csf_vol, dgm_vol, wm_vol,brain_vol,
             x_itcsf, x_ivcsf, x_stcsf]
 
 
@@ -407,8 +422,8 @@ T2Vols = output_volume(parent_dir, pid, 'T2')
 
 
 with open(parent_dir+'/SegT2/Outputs/Metrics.csv', 'wb') as f:
-    f.write('Contrast,Brainstem,Cerebellum, Cortex, CSF, DGM, WM, ITCSF, IVCSF, STCSF\n')
-    f.write('{0},{1:.7},{2:.7},{3:.7},{4:.7},{5:.7},{6:.7},{7:.7},{8:.7},{9:.7}\n'.format(*T2Vols))
+    f.write('Contrast,Brainstem,Cerebellum, Cortex, CSF, DGM, WM, Brain, ITCSF, IVCSF, STCSF\n')
+    f.write('{0},{1:.7},{2:.7},{3:.7},{4:.7},{5:.7},{6:.7},{7:.7},{8:.7},{9:.7},{10:.7}\n'.format(*T2Vols))
 
 T2Save = cfg['parent_dir'] + '/SegT2/Outputs/'+pid+'_T2_Segmentation'
 AlbertSave = cfg['parent_dir'] + '/SegT2/Outputs/'+pid+'_Albert_WTA'
