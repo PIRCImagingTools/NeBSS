@@ -4,7 +4,6 @@ import  ants_ext as ants
 import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as util
 import os,json, sys
-import tools
 import time
 from nipype import config
 
@@ -74,7 +73,6 @@ FastSeg.inputs.img_type = 2
 
 get_T2_template= pe.Node(interface=fsl.ExtractROI(),
                          name = 'get_T2_template')
-#extract_b0.inputs.t_min = 0
 get_T2_template.inputs.t_size = 1
 get_T2_template.inputs.in_file = T2_Template
 
@@ -85,41 +83,40 @@ T2linTemplate.inputs.searchr_x = [-180, 180]
 T2linTemplate.inputs.searchr_y = [-180, 180]
 T2linTemplate.inputs.searchr_z = [-180, 180]
 
-#T2warpTemplate=pe.Node(interface=fsl.FNIRT(), name='T2warpTemplate')
-#T2warpTemplate.inputs.field_file=True
-#T2warpTemplate.inputs.config_file=configfile
 
-#### REAL PARAMETERS
-#T2warpTemplate=pe.Node(interface=ants.ANTS(), name='T2warpTemplate')
-#T2warpTemplate.inputs.dimension=3
-#T2warpTemplate.inputs.metric=['CC',]
-#T2warpTemplate.inputs.metric_weight=[1.0,]
-#T2warpTemplate.inputs.radius=[10,]
-#T2warpTemplate.inputs.output_transform_prefix='ANTS_OUT'
-#T2warpTemplate.inputs.transformation_model='SyN'
-#T2warpTemplate.inputs.gradient_step_length=0.25
-#T2warpTemplate.inputs.number_of_time_steps=2
-#T2warpTemplate.inputs.delta_time=0.01
-#T2warpTemplate.inputs.number_of_iterations=[100,100,100,50]
-#T2warpTemplate.inputs.regularization='Gauss'
-#T2warpTemplate.inputs.regularization_gradient_field_sigma=3
-#T2warpTemplate.inputs.regularization_deformation_field_sigma=0
-
-### TEST PARAMETERS
+### REAL PARAMETERS
 T2warpTemplate=pe.Node(interface=ants.ANTS(), name='T2warpTemplate')
 T2warpTemplate.inputs.dimension=3
 T2warpTemplate.inputs.metric=['CC',]
 T2warpTemplate.inputs.metric_weight=[1.0,]
-T2warpTemplate.inputs.radius=[2,]
+T2warpTemplate.inputs.radius=[10,]
 T2warpTemplate.inputs.output_transform_prefix='ANTS_OUT'
 T2warpTemplate.inputs.transformation_model='SyN'
-T2warpTemplate.inputs.gradient_step_length=0.8
-T2warpTemplate.inputs.number_of_time_steps=2
-T2warpTemplate.inputs.delta_time=0.02
-T2warpTemplate.inputs.number_of_iterations=[2,2,2,1]
+T2warpTemplate.inputs.gradient_step_length=5
+T2warpTemplate.inputs.number_of_time_steps=5
+T2warpTemplate.inputs.delta_time=0.01
+T2warpTemplate.inputs.number_of_iterations=[100,100,100,50]
 T2warpTemplate.inputs.regularization='Gauss'
 T2warpTemplate.inputs.regularization_gradient_field_sigma=3
 T2warpTemplate.inputs.regularization_deformation_field_sigma=0
+
+#### TEST PARAMETERS
+#T2warpTemplate=pe.Node(interface=ants.ANTS(), name='T2warpTemplate')
+#T2warpTemplate.inputs.dimension=3
+#T2warpTemplate.inputs.metric=['CC',]
+#T2warpTemplate.inputs.metric_weight=[1.0,]
+#T2warpTemplate.inputs.radius=[2,]
+#T2warpTemplate.inputs.output_transform_prefix='ANTS_OUT'
+#T2warpTemplate.inputs.transformation_model='SyN'
+#T2warpTemplate.inputs.gradient_step_length=0.8
+#T2warpTemplate.inputs.number_of_time_steps=2
+#T2warpTemplate.inputs.delta_time=0.02
+#T2warpTemplate.inputs.number_of_iterations=[2,2,2,1]
+#T2warpTemplate.inputs.regularization='Gauss'
+#T2warpTemplate.inputs.regularization_gradient_field_sigma=3
+#T2warpTemplate.inputs.regularization_deformation_field_sigma=0
+#
+#############################################################
 
 T2warpTemplate.config = {'execution':
                          {'remove_unnuecessary_outputs' : False}
@@ -127,6 +124,9 @@ T2warpTemplate.config = {'execution':
 
 def agg_transforms(warp, affine):
     return [warp, affine]
+
+def inv_agg_transforms(warp, affine):
+    return [affine, warp]
 
 T2_warp_to_standard=pe.Node(interface=ants.WarpImageMultiTransform(),
                                name='T2_warp_to_standard')
@@ -141,11 +141,12 @@ T2_warp_to_standard_agg = pe.Node(name='T2_warp_to_standard_agg',
 apply_T2_warp=pe.MapNode(interface=ants.WarpImageMultiTransform(),
                          name='apply_T2_warp',
                          iterfield=['input_image'])
+apply_T2_warp.inputs.invert_affine = [1,]
 
 apply_T2_warp_agg = pe.Node(name='apply_T2_warp_agg',
                     interface = util.Function(input_names=['warp','affine'],
                                          output_names=['trans_series'],
-                                         function = agg_transforms))
+                                         function = inv_agg_transforms))
 
 get_masks = pe.MapNode(interface=fsl.ExtractROI(), name = 'get_masks',
                               iterfield=['in_file'])
@@ -210,73 +211,68 @@ get_albert_seg= pe.Node(name='get_albert_seg',
 get_albert_seg.inputs.group = albert_group
 get_albert_seg.inputs.local_path = local_path
 
-albert_lin = pe.MapNode(interface=fsl.FLIRT(), name='albert_lin', iterfield='in_file')
-#T2linTemplate.inputs.reference=Template
-albert_lin.inputs.dof = 12
-albert_lin.inputs.searchr_x = [-180, 180]
-albert_lin.inputs.searchr_y = [-180, 180]
-albert_lin.inputs.searchr_z = [-180, 180]
-
-
-#albert_warp=pe.MapNode(interface=fsl.FNIRT(), name='albert_warp', iterfield=['in_file','affine_file'])
-#albert_warp.inputs.field_file=True
-#albert_warp.inputs.config_file=albert_config
 
 #### REAL PARAMETERS
-#albert_warp=pe.MapNode(interface=ants.ANTS(),
-#                       name='albert_warp',
-#                       iterfield=['moving_image'])
-#albert_warp.inputs.dimension=3
-#albert_warp.inputs.metric=['CC',]
-#albert_warp.inputs.metric_weight=[1.0,]
-#albert_warp.inputs.radius=[10,]
-#albert_warp.inputs.output_transform_prefix='ANTS_OUT'
-#albert_warp.inputs.transformation_model='SyN'
-#albert_warp.inputs.gradient_step_length=0.5
-#albert_warp.inputs.number_of_time_steps=5
-#albert_warp.inputs.delta_time=0.01
-#albert_warp.inputs.number_of_iterations=[100,100,100,50]
-#albert_warp.inputs.regularization='Gauss'
-#albert_warp.inputs.regularization_gradient_field_sigma=3
-#albert_warp.inputs.regularization_deformation_field_sigma=0
-
-#### TEST PARAMETERS
 albert_warp=pe.MapNode(interface=ants.ANTS(),
                        name='albert_warp',
                        iterfield=['moving_image'])
 albert_warp.inputs.dimension=3
 albert_warp.inputs.metric=['CC',]
 albert_warp.inputs.metric_weight=[1.0,]
-albert_warp.inputs.radius=[2,]
+albert_warp.inputs.radius=[10,]
 albert_warp.inputs.output_transform_prefix='ANTS_OUT'
 albert_warp.inputs.transformation_model='SyN'
-albert_warp.inputs.gradient_step_length=0.8
-albert_warp.inputs.number_of_time_steps=2
+albert_warp.inputs.gradient_step_length=5
+albert_warp.inputs.number_of_time_steps=5
 albert_warp.inputs.delta_time=0.01
-albert_warp.inputs.number_of_iterations=[2,2,2,2]
+albert_warp.inputs.number_of_iterations=[100,100,100,50]
 albert_warp.inputs.regularization='Gauss'
 albert_warp.inputs.regularization_gradient_field_sigma=3
 albert_warp.inputs.regularization_deformation_field_sigma=0
+
+#### TEST PARAMETERS
+#albert_warp=pe.MapNode(interface=ants.ANTS(),
+#                       name='albert_warp',
+#                       iterfield=['moving_image'])
+#albert_warp.inputs.dimension=3
+#albert_warp.inputs.metric=['CC',]
+#albert_warp.inputs.metric_weight=[1.0,]
+#albert_warp.inputs.radius=[2,]
+#albert_warp.inputs.output_transform_prefix='ANTS_OUT'
+#albert_warp.inputs.transformation_model='SyN'
+#albert_warp.inputs.gradient_step_length=0.8
+#albert_warp.inputs.number_of_time_steps=2
+#albert_warp.inputs.delta_time=0.01
+#albert_warp.inputs.number_of_iterations=[2,2,2,2]
+#albert_warp.inputs.regularization='Gauss'
+#albert_warp.inputs.regularization_gradient_field_sigma=3
+#albert_warp.inputs.regularization_deformation_field_sigma=0
+
+##############################
 
 albert_warp.config = {'execution':
                          {'remove_unnuecessary_outputs' : False}
                          }
 
+
 apply_albert_warp=pe.MapNode(interface=ants.WarpImageMultiTransform(),
                              name='apply_albert_warp',
                              iterfield=['input_image','transformation_series'])
+apply_albert_warp.inputs.use_nearest = True
+apply_albert_warp.synchronize = True
 
-apply_albert_warp_agg = pe.Node(name='apply_albert_warp_agg',
+apply_albert_warp_agg = pe.MapNode(name='apply_albert_warp_agg',
                     interface = util.Function(input_names=['warp','affine'],
                                          output_names=['trans_series'],
-                                         function = agg_transforms))
+                                         function = agg_transforms),
+                                          iterfield=['warp','affine'])
+apply_albert_warp_agg.synchronize = True
 
 
 AlbertSeg = pe.Workflow(name='AlbertSeg')
 AlbertSeg.base_dir = parent_dir+'/SegT2'
 AlbertSeg.connect([
-                (get_albert_list, albert_lin, [('albert_list','in_file')]),
-                    (albert_lin, albert_warp, [('out_file','moving_image')]),
+               (get_albert_list, albert_warp, [('albert_list','moving_image')]),
          (albert_warp, apply_albert_warp_agg, [('warp_transform', 'warp'),
                                                ('affine_transform', 'affine')]),
    (apply_albert_warp_agg, apply_albert_warp, [('trans_series','transformation_series')]),
@@ -302,10 +298,8 @@ SegT2.connect([
                       (cropT2, reorientT2, [('roi_file', 'in_file')]),
                        (reorientT2, betT2, [('out_file', 'in_file')]),
                           (betT2, FastSeg, [('out_file', 'in_files')]),
-                  (FastSeg, T2linTemplate, [('restored_image', 'in_file')]),
      (get_template_index, get_T2_template, [('index', 't_min')]),
-          (get_T2_template, T2linTemplate, [('roi_file', 'reference')]),
-           (T2linTemplate, T2warpTemplate, [('out_file', 'moving_image')]),
+                 (FastSeg, T2warpTemplate, [('restored_image', 'moving_image')]),
          (get_T2_template, T2warpTemplate, [('roi_file', 'fixed_image')]),
            (get_template_index, get_masks, [('index', 't_min')]),
        (T2warpTemplate, apply_T2_warp_agg, [('inverse_warp_transform', 'warp'),
@@ -313,7 +307,6 @@ SegT2.connect([
         (apply_T2_warp_agg, apply_T2_warp, [('trans_series', 'transformation_series')]),
                 (get_masks, apply_T2_warp, [('roi_file', 'input_image')]),
                   (FastSeg, apply_T2_warp, [('restored_image', 'reference_image')]),
-                      (FastSeg, AlbertSeg, [('restored_image','albert_lin.reference')]),
                       (FastSeg, AlbertSeg, [('restored_image','albert_warp.fixed_image')]),
                       (FastSeg, AlbertSeg, [('restored_image',
                                                      'apply_albert_warp.reference_image')]),
