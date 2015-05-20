@@ -97,8 +97,8 @@ T2warpTemplate.inputs.number_of_time_steps=5
 T2warpTemplate.inputs.delta_time=0.01
 T2warpTemplate.inputs.number_of_iterations=[100,100,100,50]
 T2warpTemplate.inputs.regularization='Gauss'
-T2warpTemplate.inputs.regularization_gradient_field_sigma=3
-T2warpTemplate.inputs.regularization_deformation_field_sigma=0
+T2warpTemplate.inputs.regularization_gradient_field_sigma=0
+T2warpTemplate.inputs.regularization_deformation_field_sigma=3
 
 #### TEST PARAMETERS
 #T2warpTemplate=pe.Node(interface=ants.ANTS(), name='T2warpTemplate')
@@ -113,8 +113,8 @@ T2warpTemplate.inputs.regularization_deformation_field_sigma=0
 #T2warpTemplate.inputs.delta_time=0.02
 #T2warpTemplate.inputs.number_of_iterations=[2,2,2,1]
 #T2warpTemplate.inputs.regularization='Gauss'
-#T2warpTemplate.inputs.regularization_gradient_field_sigma=3
-#T2warpTemplate.inputs.regularization_deformation_field_sigma=0
+#T2warpTemplate.inputs.regularization_gradient_field_sigma=0
+#T2warpTemplate.inputs.regularization_deformation_field_sigma=3
 #
 #############################################################
 
@@ -227,8 +227,8 @@ albert_warp.inputs.number_of_time_steps=5
 albert_warp.inputs.delta_time=0.01
 albert_warp.inputs.number_of_iterations=[100,100,100,50]
 albert_warp.inputs.regularization='Gauss'
-albert_warp.inputs.regularization_gradient_field_sigma=3
-albert_warp.inputs.regularization_deformation_field_sigma=0
+albert_warp.inputs.regularization_gradient_field_sigma=0
+albert_warp.inputs.regularization_deformation_field_sigma=3
 
 #### TEST PARAMETERS
 #albert_warp=pe.MapNode(interface=ants.ANTS(),
@@ -245,8 +245,8 @@ albert_warp.inputs.regularization_deformation_field_sigma=0
 #albert_warp.inputs.delta_time=0.01
 #albert_warp.inputs.number_of_iterations=[2,2,2,2]
 #albert_warp.inputs.regularization='Gauss'
-#albert_warp.inputs.regularization_gradient_field_sigma=3
-#albert_warp.inputs.regularization_deformation_field_sigma=0
+#albert_warp.inputs.regularization_gradient_field_sigma=0
+#albert_warp.inputs.regularization_deformation_field_sigma=3
 
 ##############################
 
