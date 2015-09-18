@@ -142,7 +142,7 @@ class ANTS(ANTSCommand):
         parameters = []
         for elem in (stepLength, timeStep, deltaTime, symmetryType):
             if not elem is traits.Undefined:
-                parameters.append('%#.2g' % elem)
+                parameters.append('{0}'.format(elem))
         if len(parameters) > 0:
             if len(parameters) > 1:
                 parameters = ','.join(parameters)
