@@ -6,7 +6,7 @@ import subprocess
 import sys
 try:
     import wx
-    import wxPython.lib.scrolledpanel as scrolled
+#    import wxPython.lib.scrolledpanel as scrolled
 except ImportError:
     raise ImportError,"wxPython module is required."
 
