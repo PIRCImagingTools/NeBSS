@@ -1,4 +1,0 @@
-#!/usr/bin/python
-import NeoSeg.ui.neoseg_gui
-
-NeoSeg.ui.neoseg_gui.start()
