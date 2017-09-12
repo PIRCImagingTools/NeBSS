@@ -11,13 +11,16 @@ The following software must be installed first:
 
 - fsl
 - ants 
-- python-nipy
-- python-nipype
+
+Get these from pip (rather than apt-get on Debian)
+- nipy
+- nipype
 
 
 CONFIGURATION
 --------------
-Add to config file the location of your ALBERT atlas directory:
+Add to config file the location of your ALBERT atlas directories
+-- Downloaded from source
 
 
 RUNNING

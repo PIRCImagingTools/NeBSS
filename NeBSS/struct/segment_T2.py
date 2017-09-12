@@ -240,7 +240,7 @@ apply_albert_warp_agg.synchronize = True
 
 
 AlbertSeg = pe.Workflow(name='AlbertSeg')
-AlbertSeg.base_dir = parent_dir+'/SegT2'
+AlbertSeg.base_dir = os.path.join(parent_dir,'/SegT2')
 AlbertSeg.connect([
                (get_albert_list, albert_warp, [('albert_list','moving_image')]),
          (albert_warp, apply_albert_warp_agg, [('warp_transform', 'warp'),
@@ -252,7 +252,7 @@ AlbertSeg.connect([
 
 
 datasink = pe.Node(interface=nio.DataSink(), name='datasink')
-datasink.inputs.base_directory = parent_dir+'/SegT2/Outputs'
+datasink.inputs.base_directory = os.path.join(parent_dir,'SegT2/Outputs')
 datasink.inputs.substitutions = [('_apply_T2_warp', ''),
                                  ('_roi_reoriented_brain_restore_wimt', '_T2_StdSpace'),
                                  ('_roi_reoriented_brain_restore','_T2_Bias_Corrected'),
