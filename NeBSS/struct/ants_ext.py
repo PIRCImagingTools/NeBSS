@@ -38,9 +38,9 @@ class ANTSInputSpec(ANTSCommandInputSpec):
     transformation_model = traits.Enum('Diff', 'Elast', 'Exp', 'Greedy Exp',
                                        'SyN', argstr='%s', mandatory=True,
                                        desc='')
-    gradient_step_length = traits.Float(
+    gradient_step_length = traits.Int(
         requires=['transformation_model'], desc='')
-    number_of_time_steps = traits.Float(
+    number_of_time_steps = traits.Int(
         requires=['gradient_step_length'], desc='')
     delta_time = traits.Float(requires=['number_of_time_steps'], desc='')
     symmetry_type = traits.Float(requires=['delta_time'], desc='')

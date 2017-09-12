@@ -24,7 +24,7 @@ def determine_path():
 local_path = determine_path()
 print "local path: "+local_path
 
-atlas_config = os.path.abspath(local_path+'/../../atlas_config.json')
+atlas_config = os.path.abspath(local_path+'/../../template_config.json')
 with open(atlas_config, 'r') as f:
     atlas_dirs = json.load(f)
 
@@ -66,8 +66,8 @@ reorientT2 = pe.Node(interface=fsl.Reorient2Std(), name = 'reorientT2')
 
 betT2 = pe.Node(interface=fsl.BET(),name='betT2')
 betT2.inputs.frac=0.2
-betT2.inputs.robust=True
-betT2.inputs.center = cfg['T2_center']
+#betT2.inputs.robust=True
+#betT2.inputs.center = cfg['T2_center']
 
 
 FastSeg = pe.Node(interface=fsl.FAST(), name = 'FastSeg')
@@ -158,7 +158,7 @@ get_template_index.inputs.PCA = pca
 
 
 albert_group = cfg['albert_group']
-def get_albert_group(group,local_path):
+def get_albert_group(group,local_path,ALBERT):
     import os
     groups = {
         '<27':['06','09','15','17','18'],
@@ -172,14 +172,14 @@ def get_albert_group(group,local_path):
 
 
 get_albert_list= pe.Node(name='get_albert_list',
-                    interface = util.Function(input_names=['group','local_path'],
+                    interface = util.Function(input_names=['group','local_path', 'ALBERT'],
                                          output_names=['albert_list'],
                                          function = get_albert_group))
 get_albert_list.inputs.group = albert_group
 get_albert_list.inputs.local_path = local_path
+get_albert_list.inputs.ALBERT = ALBERT
 
-
-def get_seg_list(group,local_path):
+def get_seg_list(group,local_path,ALBERT):
     import os
     groups = {
         '<27':['06','09','15','17','18'],
@@ -193,11 +193,12 @@ def get_seg_list(group,local_path):
 
 
 get_albert_seg= pe.Node(name='get_albert_seg',
-                    interface = util.Function(input_names=['group','local_path'],
+                    interface = util.Function(input_names=['group','local_path','ALBERT'],
                                          output_names=['seg_list'],
                                          function = get_seg_list))
 get_albert_seg.inputs.group = albert_group
 get_albert_seg.inputs.local_path = local_path
+get_albert_seg.inputs.ALBERT = ALBERT
 
 
 #### REAL PARAMETERS
