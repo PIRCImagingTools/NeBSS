@@ -101,6 +101,7 @@ T2warpTemplate.inputs.gradient_step_length=5
 T2warpTemplate.inputs.number_of_time_steps=5
 T2warpTemplate.inputs.delta_time=0.01
 T2warpTemplate.inputs.number_of_iterations=[100,100,100,50]
+#T2warpTemplate.inputs.number_of_iterations=[2,2,2,1] #test parameters
 T2warpTemplate.inputs.regularization='Gauss'
 T2warpTemplate.inputs.regularization_gradient_field_sigma=0
 T2warpTemplate.inputs.regularization_deformation_field_sigma=3
@@ -187,7 +188,7 @@ def get_seg_list(group,local_path,ALBERT):
         '30-36':['07','13','16','19'],
         'Term':['01','02','03','04','05']
     }
-    return [os.path.abspath(ALBERT + 'ALBERT_{0}_ISG_seg50.nii'.format(x))
+    return [os.path.abspath(ALBERT + 'segmentations/ALBERT_{0}_ISG_seg50.nii'.format(x))
                               for x in groups[group]]
 
 
@@ -214,6 +215,7 @@ albert_warp.inputs.transformation_model='SyN'
 albert_warp.inputs.gradient_step_length=5
 albert_warp.inputs.number_of_time_steps=5
 albert_warp.inputs.delta_time=0.01
+#albert_warp.inputs.number_of_iterations=[2,2,2,1] #test parameters
 albert_warp.inputs.number_of_iterations=[100,100,100,50]
 albert_warp.inputs.regularization='Gauss'
 albert_warp.inputs.regularization_gradient_field_sigma=0
@@ -285,21 +287,11 @@ SegT2.connect([
                                             ('affine_transform', 'affine')]),
 (T2_warp_to_standard_agg,
                       T2_warp_to_standard, [('trans_series', 'transformation_series')]),
-                (T2warpTemplate, datasink, [('warp_transform_x','T2WarpTemplate.@std_transform_x'),
-                                            ('warp_transform_y','T2WarpTemplate.@std_transform_y'),
-                                            ('warp_transform_z','T2WarpTemplate.@std_transform_z'),
-                                            ('inverse_warp_transform_x','T2WarpTemplate.@std_inv_transform_x'),
-                                            ('inverse_warp_transform_y','T2WarpTemplate.@std_inv_transform_y'),
-                                            ('inverse_warp_transform_z','T2WarpTemplate.@std_inv_transform_z')]),
-                     (AlbertSeg, datasink, [('albert_warp.warp_transform_x','T2WarpTemplate.@albert_transform_x'),
-                                            ('albert_warp.warp_transform_y','T2WarpTemplate.@albert_transform_y'),
-                                            ('albert_warp.warp_transform_z','T2WarpTemplate.@albert_transform_z'),
-                                            ('albert_warp.inverse_warp_transform_x',
-                                                            'T2WarpTemplate.@albert_inv_transform_x'),
-                                            ('albert_warp.inverse_warp_transform_y',
-                                                            'T2WarpTemplate.@albert_inv_transform_y'),
-                                            ('albert_warp.inverse_warp_transform_z',
-                                                            'T2WarpTemplate.@albert_inv_transform_z')]),
+                (T2warpTemplate, datasink, [('warp_transform','T2WarpTemplate.@std_transform'),
+                                            ('inverse_warp_transform','T2WarpTemplate.@std_inv_transform')]),
+                     (AlbertSeg, datasink, [('albert_warp.warp_transform','T2WarpTemplate.@albert_transform'),
+                                            ('albert_warp.inverse_warp_transform',
+                                                            'T2WarpTemplate.@albert_inv_transform')]),
            (T2_warp_to_standard, datasink, [('output_image', 'T2_Standard_Space.@T2W')]),
                        (FastSeg, datasink, [('partial_volume_files', 'Fast_PVE.@FPVE')]),
                  (apply_T2_warp, datasink, [('output_image', 'T2_Tissue_Classes.@T2TC')]),
