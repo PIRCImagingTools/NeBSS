@@ -35,4 +35,49 @@ cd into directory (or add sortcut)
 python nebss_gui.py
 
 
+Input: T2 weighted scans, in nifty format T1 input will also work but is more of a work 
+
+learn how to convert here:
+
+dcm2niix - software to convert dicom to nifti format, 
+documentation https://www.nitrc.org/plugins/mwiki/index.php/dcm2nii:MainPage
+download https://github.com/rordenlab/dcm2niix.
+
+Output: Albert_wta.nii = nifti segmentation masks
+Step-by-step guide
+1.Create a new parent folder for each case for the output
+
+mkdir <casename>
+
+
+2. Run NeBSS
+
+nebss_gui.py
+
+3. a. This will open a graphic user interface
+
+PID = <patID>, PCA = post conceptional age in weeks, choose Albert group (early preterm, late preterm, term)
+Parent Dir: path/to/parent/folder/<casename>
+Struct T2: path/to/inputfile/T2.nii
+
+Define cropping dimensions: open T2.nii file in fsleyes to define boundaries:
+
+You want the Voxel Location, which is the grid coordinate of the voxel, ranging from 0 to total number of voxels in that direction (positive numbers, X1 is always smaller than X2).
+No definite convention exists, but: coronal acquired usually: X=RL, Y=IS, Z=AP,  sagitally acquired usually: X=AP, Y=IS, Z=RL for example. Z is usually the image "slices". MNI space is: X = RL, Y=AP, Z=IS.
+
+NOTE: The scanner/anatomical coordinates start with 0 in the center of the volume, and will go positive/negative moving away from that. You don't want these coordinates. 
+see: https://itk.org/Wiki/File:DICOM-OrientationDiagram-LPS.png
+
+
+If your input is a T1 or the FSE is >3mm, use T1 image and add FSE and run RegFSE and use the output as input for structural T2.
+
+b. Save config before running
+
+c. Click T2seg to run segmentation (this will take about 20h)
+
+Quick check: Segmentation.png
+
+Output folder: <casename>/SegT2/Outputs/ 
+
+Check the output in fsleyes: the segmentation will be the Albert_wta file, overlayed on the T2_bias_corrected image
 
