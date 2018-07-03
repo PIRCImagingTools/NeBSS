@@ -252,9 +252,9 @@ AlbertSeg.connect([
 ])
 
 
-
+datasink_dir = os.path.join(parent_dir,'SegT2/Outputs')
 datasink = pe.Node(interface=nio.DataSink(), name='datasink')
-datasink.inputs.base_directory = os.path.join(parent_dir,'/SegT2/Outputs')
+datasink.inputs.base_directory = datasink_dir
 datasink.inputs.substitutions = [('_apply_T2_warp', ''),
                                  ('_roi_reoriented_brain_restore_wimt', '_T2_StdSpace'),
                                  ('_roi_reoriented_brain_restore','_T2_Bias_Corrected'),
