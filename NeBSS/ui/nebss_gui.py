@@ -443,8 +443,18 @@ class Run_Buttons(wx.Panel):
         sizer.Add(self.view, 0, wx.CENTER|wx.ALL, 5)
         self.Bind(wx.EVT_BUTTON, self.OnView, self.view)
 
+	self.checkBox = wx.CheckBox(self, label=u'Test', pos = (0,0))
+	sizer.Add(self.checkBox, 0, wx.CENTER|wx.ALL,5)
+	self.Bind(wx.EVT_CHECKBOX, self.whenChecked)
+
         self.SetSizerAndFit(sizer)
 
+    def whenChecked(self, e):
+	cb = e.GetEventObject()
+	isTest = cb.GetValue()
+	
+    def printTest():
+	print isTest  
 
     def OnSegT1(self, event):
         parent = self.top.parent_dir_field.GetValue()
@@ -485,11 +495,13 @@ class Run_Buttons(wx.Panel):
 
     def OnSegT2(self, event):
         parent = self.top.parent_dir_field.GetValue()
-        pid = self.top.pid_field.GetValue()
+        pid = self.top.pid_field.GetValue()	
         config_file = parent+'/'+pid+'_config.json'
+	print config_file
         if os.path.isfile(config_file):
             env = os.environ.copy()
             env['nebss_config'] = config_file
+            env['nebss_test'] = isTest
             reg = os.path.abspath(local_path+'/../struct/segment_T2.py')
             cmd = 'ipython '+ reg
             task = shlex.split(cmd)
