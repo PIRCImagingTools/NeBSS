@@ -21,6 +21,8 @@ def determine_path():
         print "Problem with installation?"
         sys.exit()
 
+print isTest
+
 local_path = determine_path()
 print "local path: "+local_path
 
@@ -33,9 +35,12 @@ config_file = os.environ['nebss_config']
 with open(config_file, 'r') as f:
     cfg = json.load(f)
 
+isTest = os.environ['nebss_test']
+
 parent_dir = cfg['parent_dir']
 pca = int(cfg['pca'])
 pid = cfg['pid']
+isTest = cfg['isTestf']
 
 Atlas2 = atlas_dirs['NeonatalAtlas2_DIR']
 ALBERT = atlas_dirs['ALBERT_DIR']
@@ -100,12 +105,14 @@ T2warpTemplate.inputs.transformation_model='SyN'
 T2warpTemplate.inputs.gradient_step_length=5
 T2warpTemplate.inputs.number_of_time_steps=5
 T2warpTemplate.inputs.delta_time=0.01
-T2warpTemplate.inputs.number_of_iterations=[100,100,100,50]
-#T2warpTemplate.inputs.number_of_iterations=[2,2,2,1] #test parameters
 T2warpTemplate.inputs.regularization='Gauss'
 T2warpTemplate.inputs.regularization_gradient_field_sigma=0
 T2warpTemplate.inputs.regularization_deformation_field_sigma=3
 
+if isTest:
+	T2warpTemplate.inputs.number_of_iterations=[2,2,2,1] #test parameters
+else:
+	T2warpTemplate.inputs.number_of_iterations=[100,100,100,50]
 
 T2warpTemplate.config = {'execution':
                          {'remove_unnuecessary_outputs' : False}
@@ -215,12 +222,14 @@ albert_warp.inputs.transformation_model='SyN'
 albert_warp.inputs.gradient_step_length=5
 albert_warp.inputs.number_of_time_steps=5
 albert_warp.inputs.delta_time=0.01
-#albert_warp.inputs.number_of_iterations=[2,2,2,1] #test parameters
-albert_warp.inputs.number_of_iterations=[100,100,100,50]
 albert_warp.inputs.regularization='Gauss'
 albert_warp.inputs.regularization_gradient_field_sigma=0
 albert_warp.inputs.regularization_deformation_field_sigma=3
 
+if isTest:
+	albert_warp.inputs.number_of_iterations=[2,2,2,1] #test parameters
+else:
+	albert_warp.inputs.number_of_iterations=[100,100,100,50]
 
 albert_warp.config = {'execution':
                          {'remove_unnuecessary_outputs' : False}
