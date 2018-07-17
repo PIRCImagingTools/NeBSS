@@ -19,7 +19,7 @@ PCA = pt_info['PCA']
 pid = [pt_info['PID']]
 
 configfile = os.path.abspath('./FNIRTconfig.cnf')
-T1_Template =os.path.abspath('../res/NeonatalAtlas2/template_T1.nii.gz')
+T2_Template =os.path.abspath('../res/NeonatalAtlas2/template_T2.nii.gz')
 
 tissuelist = ['brainstem.nii.gz', 'cerebellum.nii.gz',
               'cortex.nii.gz', 'csf.nii.gz', 'dgm.nii.gz',
@@ -29,7 +29,7 @@ TissueList = [os.path.abspath('../res/NeonatalAtlas2/') +
               '/'+ tissue for tissue in tissuelist]
 
 
-info = dict( T1=[['pid']])
+info = dict( T2=[['pid']])
 
 infosource = pe.Node(interface=util.IdentityInterface(fields=['pid']),
                      name="infosource")
@@ -42,23 +42,23 @@ datasource = pe.Node(interface=nio.DataGrabber(infields=['pid'],
 
 datasource.inputs.template = "%s"
 datasource.inputs.base_directory=data
-datasource.inputs.field_template = dict(T1=('%s_T13D.nii.gz'))
+datasource.inputs.field_template = dict(T2=('%s_T23D.nii.gz'))
 datasource.inputs.template_args = info
 datasource.inputs.sort_filelist=False
 
-cropT1 = pe.Node(interface=fsl.ExtractROI(), name = 'cropT1')
-cropT1.inputs.x_min = pt_info['T1_crop_box'][0]
-cropT1.inputs.x_size = pt_info['T1_crop_box'][1] - pt_info['T1_crop_box'][0]
-cropT1.inputs.y_min = pt_info['T1_crop_box'][2]
-cropT1.inputs.y_size = pt_info['T1_crop_box'][3] - pt_info['T1_crop_box'][2]
-cropT1.inputs.z_min = pt_info['T1_crop_box'][4]
-cropT1.inputs.z_size = pt_info['T1_crop_box'][5] - pt_info['T1_crop_box'][4]
+cropT2 = pe.Node(interface=fsl.ExtractROI(), name = 'cropT2')
+cropT2.inputs.x_min = pt_info['T2_crop_box'][0]
+cropT2.inputs.x_size = pt_info['T2_crop_box'][1] - pt_info['T2_crop_box'][0]
+cropT2.inputs.y_min = pt_info['T2_crop_box'][2]
+cropT2.inputs.y_size = pt_info['T2_crop_box'][3] - pt_info['T2_crop_box'][2]
+cropT2.inputs.z_min = pt_info['T2_crop_box'][4]
+cropT2.inputs.z_size = pt_info['T2_crop_box'][5] - pt_info['T2_crop_box'][4]
 
 
-betT1 = pe.Node(interface=fsl.BET(),name='betT1')
-betT1.inputs.frac=0.2
-betT1.inputs.robust=True
-betT1.inputs.center = pt_info['T1_center']
+betT2 = pe.Node(interface=fsl.BET(),name='betT2')
+betT2.inputs.frac=0.2
+betT2.inputs.robust=True
+betT2.inputs.center = pt_info['T2_center']
 
 
 FastSeg = pe.Node(interface=fsl.FAST(), name = 'FastSeg')
@@ -67,10 +67,10 @@ FastSeg.inputs.output_biascorrected = True
 FastSeg.inputs.img_type = 1
 
 
-get_T1_template= pe.Node(interface=fsl.ExtractROI(), name = 'get_T1_template')
+get_T2_template = pe.Node(interface=fsl.ExtractROI(), name = 'get_T2_template')
 #extract_b0.inputs.t_min = 0
-get_T1_template.inputs.t_size = 1
-get_T1_template.inputs.in_file = T1_Template
+get_T2_template.inputs.t_size = 1
+get_T2_template.inputs.in_file = T2_Template
 
 
 T1linTemplate = pe.Node(interface=fsl.FLIRT(), name='T1linTemplate')
@@ -80,19 +80,19 @@ T1linTemplate.inputs.searchr_x = [-180, 180]
 T1linTemplate.inputs.searchr_y = [-180, 180]
 T1linTemplate.inputs.searchr_z = [-180, 180]
 
-inverse_T1_matrix = pe.Node(interface=fsl.ConvertXFM(), name='inverse_T1_matrix')
-inverse_T1_matrix.inputs.invert_xfm = True
+inverse_T2_matrix = pe.Node(interface=fsl.ConvertXFM(), name='inverse_T2_matrix')
+inverse_T2_matrix.inputs.invert_xfm = True
 
-T1warpTemplate=pe.Node(interface=fsl.FNIRT(), name='T1warpTemplate')
-T1warpTemplate.inputs.field_file=True
-T1warpTemplate.inputs.config_file=configfile
+T2warpTemplate=pe.Node(interface=fsl.FNIRT(), name='T2warpTemplate')
+T2warpTemplate.inputs.field_file=True
+T2warpTemplate.inputs.config_file=configfile
 
-inverse_T1_warp=pe.Node(interface=tools.InvWarp(), name='inverse_T1_warp')
+inverse_T2_warp=pe.Node(interface=tools.InvWarp(), name='inverse_T2_warp')
 
 
-apply_T1_warp=pe.MapNode(interface=fsl.ApplyWarp(), name='apply_T1_warp',
+apply_T2_warp=pe.MapNode(interface=fsl.ApplyWarp(), name='apply_T2_warp',
                          iterfield=['in_file'])
-apply_T1_warp.inputs.interp='nn'
+apply_T2_warp.inputs.interp='nn'
 
 
 get_masks = pe.MapNode(interface=fsl.ExtractROI(), name = 'get_masks',
@@ -117,38 +117,38 @@ get_template_index.inputs.PCA = PCA
 
 datasink = pe.Node(interface=nio.DataSink(), name='datasink')
 datasink.inputs.base_directory = data+'SegT1/Outputs'
-datasink.inputs.substitutions = [('_apply_T1_warp', ''),
-                                 ('_T13D_roi_brain_restore_warped', '_T1_StdSpace'),
-                                 ('_T13D_roi_brain_restore','_T1_Bias_Corrected'),
-                                 ('T13D_roi_brain_pve', 'pve'),
+datasink.inputs.substitutions = [('_apply_T2_warp', ''),
+                                 ('_T23D_roi_brain_restore_warped', '_T2_StdSpace'),
+                                 ('_T23D_roi_brain_restore','_T2_Bias_Corrected'),
+                                 ('T23D_roi_brain_pve', 'pve'),
                                  ('_roi_warp', ''),
                                  ('_pid_','')]
 
 
-SegT1 = pe.Workflow(name='SegT1')
-SegT1.base_dir = data
-SegT1.connect([
+SegT2 = pe.Workflow(name='SegT2')
+SegT2.base_dir = data
+SegT2.connect([
                   (infosource, datasource, [('pid', 'pid')]),
-                      (datasource, cropT1, [('T1', 'in_file')]),
-                           (cropT1, betT1, [('roi_file', 'in_file')]),
-                          (betT1, FastSeg, [('out_file', 'in_files')]),
-                  (FastSeg, T1linTemplate, [('restored_image', 'in_file')]),
-     (get_template_index, get_T1_template, [('index', 't_min')]),
-          (get_T1_template, T1linTemplate, [('roi_file', 'reference')]),
-                 (FastSeg, T1warpTemplate, [('restored_image', 'in_file')]),
-           (T1linTemplate, T1warpTemplate, [('out_matrix_file', 'affine_file')]),
+                      (datasource, cropT2, [('T2', 'in_file')]),
+                           (cropT2, betT2, [('roi_file', 'in_file')]),
+                          (betT2, FastSeg, [('out_file', 'in_files')]),
+                  (FastSeg, T2linTemplate, [('restored_image', 'in_file')]),
+     (get_template_index, get_T2_template, [('index', 't_min')]),
+          (get_T2_template, T2linTemplate, [('roi_file', 'reference')]),
+                 (FastSeg, T2warpTemplate, [('restored_image', 'in_file')]),
+           (T2linTemplate, T2warpTemplate, [('out_matrix_file', 'affine_file')]),
          (get_T1_template, T1warpTemplate, [('roi_file', 'ref_file')]),
-         (T1warpTemplate, inverse_T1_warp, [('field_file', 'in_file')]),
-                (FastSeg, inverse_T1_warp, [('restored_image', 'ref_file')]),
+         (T2warpTemplate, inverse_T2_warp, [('field_file', 'in_file')]),
+                (FastSeg, inverse_T2_warp, [('restored_image', 'ref_file')]),
            (get_template_index, get_masks, [('index', 't_min')]),
-                (get_masks, apply_T1_warp, [('roi_file', 'in_file')]),
-          (inverse_T1_warp, apply_T1_warp, [('out_file', 'field_file')]),
-                  (FastSeg, apply_T1_warp, [('restored_image', 'ref_file')]),
-                (T1warpTemplate, datasink, [('warped_file', 'T1_Standard_Space.@T1W')]),
+                (get_masks, apply_T2_warp, [('roi_file', 'in_file')]),
+          (inverse_T2_warp, apply_T2_warp, [('out_file', 'field_file')]),
+                  (FastSeg, apply_T2_warp, [('restored_image', 'ref_file')]),
+                (T2warpTemplate, datasink, [('warped_file', 'T2_Standard_Space.@T1W')]),
                        (FastSeg, datasink, [('partial_volume_files', 'Fast_PVE.@FPVE')]),
-                 (apply_T1_warp, datasink, [('out_file', 'T1_Tissue_Classes.@T1TC')]),
+                 (apply_T2_warp, datasink, [('out_file', 'T2_Tissue_Classes.@T2TC')]),
                        (FastSeg, datasink, [('restored_image',
-                                                    'T1_Bias_Corrected.@T1B')])
+                                                    'T2_Bias_Corrected.@T1B')])
                                 ])
 
 from nipype.interfaces.fsl import ImageStats
@@ -180,7 +180,7 @@ def output_volume(parent_dir, pid, con):
 
 
 def create_image(parent_dir, pid, con, center, savefile):
-    sourcedir = parent_dir+'SegT1/Outputs/'
+    sourcedir = parent_dir+'SegT2/Outputs/'
     bg = sourcedir+con+'_Bias_Corrected/'+pid+'/'+pid+'_'+con+'_Bias_Corrected.nii.gz'
     mskdir = sourcedir+con+'_Tissue_Classes/'+pid+'/'
     image = MapMaker(bg)
@@ -196,24 +196,24 @@ def create_image(parent_dir, pid, con, center, savefile):
 
 if __name__ == '__main__':
     start = time.time()
-    SegT1.write_graph()
-    SegT1.run()
+    SegT2.write_graph()
+    SegT2.run()
     finish = (time.time() - start) / 60
 
     print 'Time taken: {0:.7} minutes'.format(finish)
 
     pid = pid[0]
     print pid
-    T1Vols = output_volume(data, pid, 'T1')
+    T2Vols = output_volume(data, pid, 'T2')
 
 
     with open(data+'/SegT1/Outputs/Metrics.csv', 'wb') as f:
         f.write('Contrast,Brainstem,Cerebellum, Cortex, CSF, DGM, WM\n')
         f.write('{0},{1:.7},{2:.7},{3:.7},{4:.7},{5:.7},{6:.7}\n'.format(*T1Vols))
 
-    T1Save = pt_info['parent_dir'] + 'SegT1/Outputs/'+pid+'_T1_Segmentation'
+    T2Save = pt_info['parent_dir'] + 'SegT2/Outputs/'+pid+'_T2_Segmentation'
 
-    create_image(data, pid, 'T1', pt_info['T1_center'],T1Save)
+    create_image(data, pid, 'T2', pt_info['T2_center'],T2Save)
 
 
 
