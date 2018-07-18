@@ -21,8 +21,6 @@ def determine_path():
         print "Problem with installation?"
         sys.exit()
 
-print isTest
-
 local_path = determine_path()
 print "local path: "+local_path
 
@@ -40,7 +38,9 @@ isTest = os.environ['nebss_test']
 parent_dir = cfg['parent_dir']
 pca = int(cfg['pca'])
 pid = cfg['pid']
-isTest = cfg['isTestf']
+isTest = cfg['isTest']
+
+print isTest
 
 Atlas2 = atlas_dirs['NeonatalAtlas2_DIR']
 ALBERT = atlas_dirs['ALBERT_DIR']
