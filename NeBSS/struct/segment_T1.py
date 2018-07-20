@@ -21,7 +21,6 @@ def determine_path():
         print "Problem with installation?"
         sys.exit()
 
-print isTest
 
 local_path = determine_path()
 print "local path: "+local_path
@@ -35,12 +34,12 @@ config_file = os.environ['nebss_config']
 with open(config_file, 'r') as f:
     cfg = json.load(f)
 
+print(os.environ)
 isTest = os.environ['nebss_test']
 
 parent_dir = cfg['parent_dir']
 pca = int(cfg['pca'])
 pid = cfg['pid']
-isTest = cfg['isTestf']
 
 Atlas2 = atlas_dirs['NeonatalAtlas2_DIR']
 ALBERT = atlas_dirs['ALBERT_DIR']
@@ -84,14 +83,7 @@ FastSeg.inputs.img_type = 2
 get_T1_template= pe.Node(interface=fsl.ExtractROI(),
                          name = 'get_T1_template')
 get_T1_template.inputs.t_size = 1
-get_T1_template.inputs.in_file = T1
-
-
-
-
-
-
-_Template
+get_T1_template.inputs.in_file = T1_Template
 
 
 T1linTemplate = pe.Node(interface=fsl.FLIRT(), name='T1linTemplate')
