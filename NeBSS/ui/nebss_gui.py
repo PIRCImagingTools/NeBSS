@@ -424,6 +424,7 @@ class Run_Buttons(wx.Panel):
         wx.Panel.__init__(self, parent, style=wx.SIMPLE_BORDER)
         self.frame = parent
         self.top = top
+	self.isTest = False
 
         sizer = wx.BoxSizer(wx.VERTICAL)
 
@@ -452,9 +453,10 @@ class Run_Buttons(wx.Panel):
     def whenChecked(self, e):
 	cb = e.GetEventObject()
 	isTest = cb.GetValue()
+	self.isTest = isTest
 	
     def printTest():
-	print isTest  
+	print self.isTest  
 
     def OnSegT1(self, event):
         parent = self.top.parent_dir_field.GetValue()
@@ -463,6 +465,7 @@ class Run_Buttons(wx.Panel):
         if os.path.isfile(config_file):
             env = os.environ.copy()
             env['nebss_config'] = config_file
+            env['nebss_test'] = str(self.isTest)
             reg = os.path.abspath(local_path+'/../struct/segment_T1.py')
             cmd = 'ipython '+ reg
             task = shlex.split(cmd)
