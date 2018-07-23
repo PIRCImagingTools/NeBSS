@@ -32,15 +32,14 @@ with open(atlas_config, 'r') as f:
 config_file = os.environ['nebss_config']
 with open(config_file, 'r') as f:
     cfg = json.load(f)
+    
+print(os.environ)
 
 isTest = os.environ['nebss_test']
 
 parent_dir = cfg['parent_dir']
 pca = int(cfg['pca'])
 pid = cfg['pid']
-isTest = cfg['isTest']
-
-print isTest
 
 Atlas2 = atlas_dirs['NeonatalAtlas2_DIR']
 ALBERT = atlas_dirs['ALBERT_DIR']
