@@ -1,5 +1,5 @@
 {
-    "ALBERT_DIR": "/path/to/Albert_Atlas/",
-    "NeonatalAtlas2_DIR": "/path/to/NeonatalAtlas2/"
+    "ALBERT_DIR": "/home/pirc/Neoseg/Atlas_directories/Albert/",
+    "NeonatalAtlas2_DIR": "/home/pirc/Neoseg/Atlas_directories/NeonatalAtlas2/"
 
 }
