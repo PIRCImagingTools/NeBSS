@@ -399,9 +399,7 @@ def create_image(parent_dir, pid, savefile):
 start = time.time()
 SegT2.write_graph()
 SegT2.run()
-finish = (time.time() - start) / 60
 
-print 'Time taken: {0:.7} minutes'.format(finish)
 
 pid = pid
 print pid
@@ -422,6 +420,9 @@ merge_regs(AlbertOutDir, AlbertFile)
 get_mode(AlbertFile, AlbertSave)
 create_image(parent_dir, pid,T2Save)
 
+finish = (time.time() - start) / 60
+
+print 'Time taken: {0:.7} minutes'.format(finish)
 
 
 
