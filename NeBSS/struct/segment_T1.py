@@ -78,6 +78,7 @@ FastSeg = pe.Node(interface=fsl.FAST(), name = 'FastSeg')
 #FastSeg.inputs.terminal_output = 'stream'
 FastSeg.inputs.output_biascorrected = True
 FastSeg.inputs.img_type = 1
+FastSeg.inputs.number_classes = 4
 
 
 get_T1_template= pe.Node(interface=fsl.ExtractROI(),

@@ -17,12 +17,12 @@ def determine_path():
             root = os.path.realpath(root)
         return os.path.dirname(os.path.abspath(root))
     except:
-        print "No __file__ variable"
-        print "Problem with installation?"
+        print("No __file__ variable")
+        print("Problem with installation?")
         sys.exit()
 
 local_path = determine_path()
-print "local path: "+local_path
+print("local path: "+local_path)
 
 atlas_config = os.path.abspath(local_path+'/../../template_config.json')
 with open(atlas_config, 'r') as f:
@@ -32,7 +32,7 @@ with open(atlas_config, 'r') as f:
 config_file = os.environ['nebss_config']
 with open(config_file, 'r') as f:
     cfg = json.load(f)
-    
+
 print(os.environ)
 
 isTest = os.environ['nebss_test']
@@ -78,6 +78,7 @@ FastSeg = pe.Node(interface=fsl.FAST(), name = 'FastSeg')
 #FastSeg.inputs.terminal_output = 'stream'
 FastSeg.inputs.output_biascorrected = True
 FastSeg.inputs.img_type = 2
+FastSeg.inputs.number_classes= 4
 
 
 get_T2_template= pe.Node(interface=fsl.ExtractROI(),
@@ -349,14 +350,14 @@ def output_volume(parent_dir, pid, con):
 def merge_regs(out_dir, out_file):
     import subprocess, shlex
     folder_list = [out_dir+folder for folder in os.listdir(out_dir)]
-    print folder_list
+    print(folder_list)
     file_list = [folder+'/'+(os.listdir(folder)[0])
                  for folder in folder_list]
     merger = Merge()
     merger.inputs.in_files = file_list
     merger.inputs.dimension = 't'
     merger.inputs.merged_file = out_file
-    print merger.cmdline
+    print(merger.cmdline)
     command = shlex.split(merger.cmdline)
     subprocess.call(command)
 
@@ -373,7 +374,7 @@ def get_mode(seg_stack, out_file):
                 u, indices = np.unique(data[i,j,k,:],
                                        return_inverse=True)
                 voxel_mode = u[np.argmax(np.bincount(indices))]
-                print "mode at {0},{1},{2} = {3}".format(i,j,k,voxel_mode)
+                print("mode at {0},{1},{2} = {3}".format(i,j,k,voxel_mode))
                 mode[i,j,k] = voxel_mode
     mode_image = Image(mode, new_coord)
     save_image(mode_image, out_file)
@@ -401,10 +402,10 @@ SegT2.write_graph()
 SegT2.run()
 finish = (time.time() - start) / 60
 
-print 'Time taken: {0:.7} minutes'.format(finish)
+print('Time taken: {0:.7} minutes'.format(finish))
 
 pid = pid
-print pid
+print(pid)
 T2Vols = output_volume(parent_dir, pid, 'T2')
 
 
@@ -416,7 +417,7 @@ T2Save = cfg['parent_dir'] + '/SegT2/Outputs/'+pid+'_T2_Segmentation'
 AlbertSave = cfg['parent_dir'] + '/SegT2/Outputs/'+pid+'_Albert_WTA'
 AlbertFile = cfg['parent_dir'] + '/SegT2/Outputs/'+pid+'_Albert_Stack.nii.gz'
 AlbertOutDir = cfg['parent_dir']+'/SegT2/Outputs/Reg_Alberts/'
-print AlbertOutDir
+print(AlbertOutDir)
 
 merge_regs(AlbertOutDir, AlbertFile)
 get_mode(AlbertFile, AlbertSave)
