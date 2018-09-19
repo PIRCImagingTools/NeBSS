@@ -3,6 +3,7 @@ import nipype.interfaces.fsl as fsl
 import fnmatch
 import shutil
 import os
+import sys
 
 
 def check_for_fast(fast_dir):
@@ -15,9 +16,9 @@ def check_for_fast(fast_dir):
         return False
 
 
-def get_file_name(seg_dir):
+def get_file_name(seg_dir, pattern):
     bias_corrected = [n for n in fnmatch.filter(os.listdir(seg_dir),
-                                                "*_Bias_Corrected*")
+                                                pattern)
                       if os.path.isfile(os.path.join(seg_dir, n))]
     return bias_corrected[0]
 
@@ -51,13 +52,25 @@ def run_fast(outputs_dir, in_file, contrast):
     FastSeg.run()
 
 
-# TODO: Use FAST to threshold
+def binarize_mask(mask_in, mask_out):
+    pass
 
 
-# TODO: Output volumes
+def thresh_albert_gm(outputs_dir):
+    in_file = os.path.join(outputs_dir,
+                           get_file_name(outputs_dir, "*Albert_WTA*"))
+    mask_file = os.path.join(outputs_dir, "Fast_PVE", get_file_name(
+        os.path.join(outputs_dir, "Fast_PVE"), "*pve_2*"))
+    maths = fsl.MultiImageMaths()
+    maths.inputs.in_file = in_file
+    maths.inputs.op_string = "-mas %s "
+    maths.inputs.operand_files = [mask_file]
+    maths.inputs.out_file = os.path.join(outputs_dir, "Albert_GM.nii.gz")
+    maths.cmdline
+    maths.run()
 
 
-def get_thresh_vol(prob_map, tissue_class):
+def get_thresh_vol(prob_map):
     """
     Fslstats -V returns volume [voxels mm3]
     Fslstats -M returns mean value of non-zero voxels
@@ -73,13 +86,16 @@ def get_thresh_vol(prob_map, tissue_class):
 
 if __name__ == "__main__":
 
-    outputs_dir = "/home/rafa/Desktop/PT_028/SegT2/Outputs"
+    outputs_dir = os.path.abspath(sys.argv[1])
     fast_dir = os.path.join(outputs_dir, "Fast_PVE")
     tissue_class_dir = os.path.join(outputs_dir, "T2_Tissue_Classes")
-    struct_t2 = get_file_name(os.path.join(outputs_dir, "T2_Bias_Corrected"))
+    struct_t2 = get_file_name(os.path.join(outputs_dir, "T2_Bias_Corrected"),
+                              "*_Bias_Corrected*")
 
-    if check_for_fast(outputs_dir):
-        get_thresh_vol(fast_dir, tissue_class_dir)
+    if check_for_fast(fast_dir):
+        print("Checked")
+        thresh_albert_gm(outputs_dir)
+#        get_thresh_vol(fast_dir, tissue_class_dir)
     else:
         print("Running FSL Fast on file {0}".format(struct_t2))
         run_fast(outputs_dir, struct_t2, "T2")
