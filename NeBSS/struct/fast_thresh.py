@@ -99,3 +99,5 @@ if __name__ == "__main__":
     else:
         print("Running FSL Fast on file {0}".format(struct_t2))
         run_fast(outputs_dir, struct_t2, "T2")
+        thresh_albert_gm(outputs_dir)
+#       get_thresh_vol(fast_dir, tissue_class_dir)
