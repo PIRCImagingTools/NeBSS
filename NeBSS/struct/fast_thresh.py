@@ -89,20 +89,23 @@ def get_thresh_vol(prob_map):
 
 if __name__ == "__main__":
 
-    outputs_dir = os.path.abspath(sys.argv[1])
-    fast_dir = os.path.join(outputs_dir, "Fast_PVE")
-    tissue_class_dir = os.path.join(outputs_dir, "T2_Tissue_Classes")
-    struct_t2 = get_file_name(os.path.join(outputs_dir, "T2_Bias_Corrected"),
-                              "*_Bias_Corrected*")
+    try:
+        outputs_dir = os.path.abspath(sys.argv[1])
+        fast_dir = os.path.join(outputs_dir, "Fast_PVE")
+        tissue_class_dir = os.path.join(outputs_dir, "T2_Tissue_Classes")
+        struct_t2 = get_file_name(os.path.join(outputs_dir,
+                                               "T2_Bias_Corrected"),
+                                               "*_Bias_Corrected*")
 
-    print(get_albert_labels())
+        print(get_albert_labels())
 
-    if check_for_fast(fast_dir):
-        print("Checked")
-#        thresh_albert_gm(outputs_dir)
-#        get_thresh_vol(fast_dir, tissue_class_dir)
-    else:
-        print("Running FSL Fast on file {0}".format(struct_t2))
-        run_fast(outputs_dir, struct_t2, "T2")
-        thresh_albert_gm(outputs_dir)
+        if not check_for_fast(fast_dir):
+            print("Running FSL Fast on file {0}".format(struct_t2))
+            run_fast(outputs_dir, struct_t2, "T2")
+        else:
+            print("Found 4 FAST classes")
+
+#       thresh_albert_gm(outputs_dir)
 #       get_thresh_vol(fast_dir, tissue_class_dir)
+    except IndexError:
+        print("Please give path to Outputs directory")
