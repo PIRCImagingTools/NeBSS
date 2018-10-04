@@ -4,6 +4,9 @@ import fnmatch
 import shutil
 import os
 import sys
+from os import path
+sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+from res.misc import get_albert_labels
 
 
 def check_for_fast(fast_dir):
@@ -92,9 +95,11 @@ if __name__ == "__main__":
     struct_t2 = get_file_name(os.path.join(outputs_dir, "T2_Bias_Corrected"),
                               "*_Bias_Corrected*")
 
+    print(get_albert_labels())
+
     if check_for_fast(fast_dir):
         print("Checked")
-        thresh_albert_gm(outputs_dir)
+#        thresh_albert_gm(outputs_dir)
 #        get_thresh_vol(fast_dir, tissue_class_dir)
     else:
         print("Running FSL Fast on file {0}".format(struct_t2))

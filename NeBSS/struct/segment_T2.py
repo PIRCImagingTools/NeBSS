@@ -6,20 +6,10 @@ import nipype.interfaces.utility as util
 import os,json, sys
 import time
 from nipype import config
+from os import path
+sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+from res.misc import determine_path
 
-def determine_path():
-    """
-    determines the local path of the module on the OS
-    """
-    try:
-        root = __file__
-        if os.path.islink(root):
-            root = os.path.realpath(root)
-        return os.path.dirname(os.path.abspath(root))
-    except:
-        print("No __file__ variable")
-        print("Problem with installation?")
-        sys.exit()
 
 local_path = determine_path()
 print("local path: "+local_path)
