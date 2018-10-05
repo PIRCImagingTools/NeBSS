@@ -21,5 +21,13 @@ def get_albert_labels():
     local_path = determine_path()
     albert_labels = os.path.join(local_path,
                                  "../../ALBERT_Labels.txt")
-    return albert_labels
+    with open(albert_labels, 'rb') as f:
+        f.readline()
+        labels = f.readlines()
 
+    label_dict = {}
+    for line in labels:
+        line = line.strip('\n').split('\t')
+        print(line)
+        label_dict[line[0]] = line[-1]
+    return label_dict
