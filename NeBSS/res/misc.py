@@ -30,3 +30,22 @@ def get_albert_labels():
         line = line.strip('\n').split('\t')
         label_dict[line[0]] = line[-1]
     return label_dict
+
+
+def get_albert_colors():
+    local_path = determine_path()
+    albert_labels = os.path.join(local_path,
+                                 "../../ALBERT_Labels.txt")
+    with open(albert_labels, 'rb') as f:
+        f.readline()
+        labels = f.readlines()
+
+    color_list = []
+    for line in labels:
+        line = line.strip('\n').split('\t')
+        color_list.append((float(line[1])/255,
+                           float(line[2])/255,
+                           float(line[3])/255))
+    print(color_list)
+    print(len(color_list))
+    return color_list

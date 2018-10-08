@@ -1,12 +1,12 @@
-
 from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.colors import ListedColormap
 
 
 def blue():
 
     cdict = {'red':  ((0.0, 0.0, 0.0),
                       (1.0, 0.0, 0.0)),
-            'green': ((0.0, 0.0, 0.0),
+             'green': ((0.0, 0.0, 0.0),
                       (1.0, 0.0, 0.0)),
              'blue': ((0.0, 0.0, 0.3),
                       (1.0, 1.0, 1.0))
@@ -279,6 +279,12 @@ def wm():
                       (1.0, 0.9, 0.0))
             }
     return  LinearSegmentedColormap('wm', cdict)
+
+
+##########################
+
+def custom_discrete(name, colors):
+    return ListedColormap(colors, name)
 
 if __name__ =='__main__':
     from matplotlib import pyplot, mpl

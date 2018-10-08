@@ -1,3 +1,5 @@
+from map_maker import MapMaker
+import colormaps
 import nipype.interfaces.fsl as fsl
 import fnmatch
 import shutil
@@ -6,7 +8,7 @@ import sys
 import subprocess
 from os import path
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
-from res.misc import get_albert_labels
+from res.misc import get_albert_labels, get_albert_colors
 
 
 def check_for_fast(fast_dir):
@@ -90,13 +92,20 @@ def output_mask_volumes(mask_vols, output_file):
     with open(output_file, 'wb') as f:
         for label in range(len(labels)):
             # Some of the labels have commas in them, bad for csv!
-            tag = str(labels[str(label+1)]).replace(',',' ')
+            tag = str(labels[str(label+1)]).replace(',', ' ')
             print(tag)
             f.write('{0},'.format(tag))
         f.write('\n')
         for label in range(len(labels)):
             f.write("{0},".format(mask_vols[label][1]))
         f.write('\n')
+
+
+def create_image(outputs_dir, struct_t2, mask, savefile):
+    discrete = colormaps.custom_discrete("albert", get_albert_colors())
+    image = MapMaker(struct_t2)
+    image.add_overlay(mask, 0.01, 'max', discrete, alpha=0.8)
+    image.save_strip_center(savefile, 19)
 
 
 if __name__ == "__main__":
@@ -108,7 +117,9 @@ if __name__ == "__main__":
         struct_t2 = get_file_name(os.path.join(outputs_dir,
                                                "T2_Bias_Corrected"),
                                   "*_Bias_Corrected*")
-        output_file = os.path.join(outputs_dir, "Albert_GM_Volumes.csv")
+        output_mask = os.path.join(outputs_dir, 'Albert_GM.nii.gz')
+        output_csv = os.path.join(outputs_dir, "albert_gm_volumes.csv")
+        output_image = os.path.join(outputs_dir, "albert_gm_volumes.png")
 
         if not check_for_fast(fast_dir):
             print("Running FSL Fast on file {0}".format(struct_t2))
@@ -117,8 +128,10 @@ if __name__ == "__main__":
             print("Found 4 FAST classes")
 
 #       thresh_albert_gm(outputs_dir)
-        output_mask_volumes(get_mask_vol(
-                            os.path.join(outputs_dir, 'Albert_GM.nii.gz')),
-                            output_file)
+#        output_mask_volumes(get_mask_vol(output_mask), output_csv)
+        create_image(outputs_dir, os.path.join(outputs_dir,
+                                               "T2_Bias_Corrected",
+                                               struct_t2),
+                     output_mask, output_image)
     except IndexError:
         print("Please give path to Outputs directory")
