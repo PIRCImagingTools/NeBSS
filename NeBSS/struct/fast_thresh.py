@@ -85,6 +85,20 @@ def get_mask_vol(prob_map):
     return [(volumes[i], volumes[i+1]) for i in range(0, len(volumes), 2)]
 
 
+def output_mask_volumes(mask_vols, output_file):
+    labels = get_albert_labels()
+    with open(output_file, 'wb') as f:
+        for label in range(len(labels)):
+            # Some of the labels have commas in them, bad for csv!
+            tag = str(labels[str(label+1)]).replace(',',' ')
+            print(tag)
+            f.write('{0},'.format(tag))
+        f.write('\n')
+        for label in range(len(labels)):
+            f.write("{0},".format(mask_vols[label][1]))
+        f.write('\n')
+
+
 if __name__ == "__main__":
 
     try:
@@ -94,8 +108,7 @@ if __name__ == "__main__":
         struct_t2 = get_file_name(os.path.join(outputs_dir,
                                                "T2_Bias_Corrected"),
                                   "*_Bias_Corrected*")
-
-        print(get_albert_labels())
+        output_file = os.path.join(outputs_dir, "Albert_GM_Volumes.csv")
 
         if not check_for_fast(fast_dir):
             print("Running FSL Fast on file {0}".format(struct_t2))
@@ -104,6 +117,8 @@ if __name__ == "__main__":
             print("Found 4 FAST classes")
 
 #       thresh_albert_gm(outputs_dir)
-        print(get_mask_vol(os.path.join(outputs_dir, 'Albert_GM.nii.gz')))
+        output_mask_volumes(get_mask_vol(
+                            os.path.join(outputs_dir, 'Albert_GM.nii.gz')),
+                            output_file)
     except IndexError:
         print("Please give path to Outputs directory")
