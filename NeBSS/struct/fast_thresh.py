@@ -1,9 +1,9 @@
-from nipype.interfaces.fsl import ImageStats
 import nipype.interfaces.fsl as fsl
 import fnmatch
 import shutil
 import os
 import sys
+import subprocess
 from os import path
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 from res.misc import get_albert_labels
@@ -55,10 +55,6 @@ def run_fast(outputs_dir, in_file, contrast):
     FastSeg.run()
 
 
-def binarize_mask(mask_in, mask_out):
-    pass
-
-
 def thresh_albert_gm(outputs_dir):
     in_file = os.path.join(outputs_dir,
                            get_file_name(outputs_dir, "*Albert_WTA*"))
@@ -73,18 +69,20 @@ def thresh_albert_gm(outputs_dir):
     maths.run()
 
 
-def get_thresh_vol(prob_map):
+def get_mask_vol(prob_map):
     """
-    Fslstats -V returns volume [voxels mm3]
-    Fslstats -M returns mean value of non-zero voxels
-    Multiplying these gives the partial volume estimate
+    Nipype ImageStats does not have the -K pre-option yet
+    Pre-option fslstats -k returns a separate volume for each
+    value in the mask
+    So we are using a subprocess call instead
     """
 
-    Volume = ImageStats(in_file=prob_map,
-                        op_string='-V -M')
-    Vout = Volume.run()
-    outstat = Vout.outputs.out_stat
-    return outstat[1] * outstat[2]
+    volumes = subprocess.check_output(["fslstats", "-K",
+                                      prob_map, prob_map,
+                                       "-V"]).split(' ')[:-1]
+    print(volumes)
+    print(len(volumes))
+    return [(volumes[i], volumes[i+1]) for i in range(0, len(volumes), 2)]
 
 
 if __name__ == "__main__":
@@ -95,7 +93,7 @@ if __name__ == "__main__":
         tissue_class_dir = os.path.join(outputs_dir, "T2_Tissue_Classes")
         struct_t2 = get_file_name(os.path.join(outputs_dir,
                                                "T2_Bias_Corrected"),
-                                               "*_Bias_Corrected*")
+                                  "*_Bias_Corrected*")
 
         print(get_albert_labels())
 
@@ -106,6 +104,6 @@ if __name__ == "__main__":
             print("Found 4 FAST classes")
 
 #       thresh_albert_gm(outputs_dir)
-#       get_thresh_vol(fast_dir, tissue_class_dir)
+        print(get_mask_vol(os.path.join(outputs_dir, 'Albert_GM.nii.gz')))
     except IndexError:
         print("Please give path to Outputs directory")
