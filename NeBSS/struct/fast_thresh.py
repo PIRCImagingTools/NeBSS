@@ -82,8 +82,6 @@ def get_mask_vol(prob_map):
     volumes = subprocess.check_output(["fslstats", "-K",
                                       prob_map, prob_map,
                                        "-V"]).split(' ')[:-1]
-    print(volumes)
-    print(len(volumes))
     return [(volumes[i], volumes[i+1]) for i in range(0, len(volumes), 2)]
 
 
@@ -93,7 +91,6 @@ def output_mask_volumes(mask_vols, output_file):
         for label in range(len(labels)):
             # Some of the labels have commas in them, bad for csv!
             tag = str(labels[str(label+1)]).replace(',', ' ')
-            print(tag)
             f.write('{0},'.format(tag))
         f.write('\n')
         for label in range(len(labels)):
@@ -108,30 +105,36 @@ def create_image(outputs_dir, struct_t2, mask, savefile):
     image.save_strip_center(savefile, 19)
 
 
+def main(outputs_dir):
+    fast_dir = os.path.join(outputs_dir, "Fast_PVE")
+    struct_t2 = get_file_name(os.path.join(outputs_dir,
+                                           "T2_Bias_Corrected"),
+                              "*_Bias_Corrected*")
+    output_mask = os.path.join(outputs_dir, 'Albert_GM.nii.gz')
+    output_csv = os.path.join(outputs_dir, "Albert_GM_Volumes.csv")
+    output_image = os.path.join(outputs_dir, "Albert_GM_Volumes.png")
+
+    if not check_for_fast(fast_dir):
+        print("Running FSL Fast on file {0}".format(os.path.join(
+                                                    outputs_dir, struct_t2)))
+        run_fast(outputs_dir, struct_t2, "T2")
+    else:
+        print("Found 4 FAST classes")
+
+    print("Thresholding ALBERT output for {0}".format(outputs_dir))
+    thresh_albert_gm(outputs_dir)
+    output_mask_volumes(get_mask_vol(output_mask), output_csv)
+    create_image(outputs_dir, os.path.join(outputs_dir,
+                                           "T2_Bias_Corrected",
+                                           struct_t2),
+                 output_mask, output_image)
+
+
 if __name__ == "__main__":
 
     try:
         outputs_dir = os.path.abspath(sys.argv[1])
-        fast_dir = os.path.join(outputs_dir, "Fast_PVE")
-        tissue_class_dir = os.path.join(outputs_dir, "T2_Tissue_Classes")
-        struct_t2 = get_file_name(os.path.join(outputs_dir,
-                                               "T2_Bias_Corrected"),
-                                  "*_Bias_Corrected*")
-        output_mask = os.path.join(outputs_dir, 'Albert_GM.nii.gz')
-        output_csv = os.path.join(outputs_dir, "albert_gm_volumes.csv")
-        output_image = os.path.join(outputs_dir, "albert_gm_volumes.png")
+        main(outputs_dir)
 
-        if not check_for_fast(fast_dir):
-            print("Running FSL Fast on file {0}".format(struct_t2))
-            run_fast(outputs_dir, struct_t2, "T2")
-        else:
-            print("Found 4 FAST classes")
-
-#       thresh_albert_gm(outputs_dir)
-#        output_mask_volumes(get_mask_vol(output_mask), output_csv)
-        create_image(outputs_dir, os.path.join(outputs_dir,
-                                               "T2_Bias_Corrected",
-                                               struct_t2),
-                     output_mask, output_image)
     except IndexError:
         print("Please give path to Outputs directory")

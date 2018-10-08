@@ -46,6 +46,4 @@ def get_albert_colors():
         color_list.append((float(line[1])/255,
                            float(line[2])/255,
                            float(line[3])/255))
-    print(color_list)
-    print(len(color_list))
     return color_list
