@@ -5,6 +5,7 @@ import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as util
 import os,json, sys
 import time
+import fast_thresh
 from nipype import config
 from os import path
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
@@ -392,26 +393,28 @@ SegT2.write_graph()
 SegT2.run()
 finish = (time.time() - start) / 60
 
+outputs_dir = os.path.join(parent_dir, 'SegT2/Outputs')
+
 print('Time taken: {0:.7} minutes'.format(finish))
 
 pid = pid
 print(pid)
 T2Vols = output_volume(parent_dir, pid, 'T2')
 
-
-with open(parent_dir+'/SegT2/Outputs/Metrics.csv', 'wb') as f:
+with open(os.path.join(outputs_dir, 'Metrics.csv'), 'wb') as f:
     f.write('Contrast,Brainstem,Cerebellum, Cortex, CSF, DGM, WM, Brain, ITCSF, IVCSF, STCSF\n')
     f.write('{0},{1:.7},{2:.7},{3:.7},{4:.7},{5:.7},{6:.7},{7:.7},{8:.7},{9:.7},{10:.7}\n'.format(*T2Vols))
 
-T2Save = cfg['parent_dir'] + '/SegT2/Outputs/'+pid+'_T2_Segmentation'
-AlbertSave = cfg['parent_dir'] + '/SegT2/Outputs/'+pid+'_Albert_WTA'
-AlbertFile = cfg['parent_dir'] + '/SegT2/Outputs/'+pid+'_Albert_Stack.nii.gz'
-AlbertOutDir = cfg['parent_dir']+'/SegT2/Outputs/Reg_Alberts/'
+T2Save = os.path.join(outputs_dir, pid+'_T2_Segmentation')
+AlbertSave = os.path.join(outputs_dir, pid+'_Albert_WTA')
+AlbertFile = os.path.join(outputs_dir, pid+'_Albert_Stack.nii.gz')
+AlbertOutDir = os.path.join(outputs_dir, 'Reg_Alberts/')
 print(AlbertOutDir)
 
 merge_regs(AlbertOutDir, AlbertFile)
 get_mode(AlbertFile, AlbertSave)
 create_image(parent_dir, pid,T2Save)
+fast_thresh.main(outputs_dir)
 
 
 

@@ -1,6 +1,8 @@
 
 from nipy import load_image
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import colormaps
