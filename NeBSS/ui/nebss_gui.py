@@ -456,7 +456,7 @@ class Run_Buttons(wx.Panel):
         self.isTest = isTest
 
     def printTest():
-        print self.isTest  
+        print self.isTest
 
     def OnSegT1(self, event):
         parent = self.top.parent_dir_field.GetValue()
@@ -498,7 +498,7 @@ class Run_Buttons(wx.Panel):
 
     def OnSegT2(self, event):
         parent = self.top.parent_dir_field.GetValue()
-        pid = self.top.pid_field.GetValue()	
+        pid = self.top.pid_field.GetValue()
         config_file = parent+'/'+pid+'_config.json'
         print config_file
         if os.path.isfile(config_file):

@@ -27,6 +27,10 @@ with open(config_file, 'r') as f:
 print(os.environ)
 
 isTest = os.environ['nebss_test']
+if isTest == "True":
+    print("Running with TEST PARAMETERS!")
+else:
+    print("Running with normal parameters")
 
 parent_dir = cfg['parent_dir']
 pca = int(cfg['pca'])
@@ -100,7 +104,7 @@ T2warpTemplate.inputs.regularization='Gauss'
 T2warpTemplate.inputs.regularization_gradient_field_sigma=0
 T2warpTemplate.inputs.regularization_deformation_field_sigma=3
 
-if isTest:
+if isTest == "True":
 	T2warpTemplate.inputs.number_of_iterations=[2,2,2,1] #test parameters
 else:
 	T2warpTemplate.inputs.number_of_iterations=[100,100,100,50]
@@ -217,7 +221,7 @@ albert_warp.inputs.regularization='Gauss'
 albert_warp.inputs.regularization_gradient_field_sigma=0
 albert_warp.inputs.regularization_deformation_field_sigma=3
 
-if isTest:
+if isTest == "True":
 	albert_warp.inputs.number_of_iterations=[2,2,2,1] #test parameters
 else:
 	albert_warp.inputs.number_of_iterations=[100,100,100,50]
