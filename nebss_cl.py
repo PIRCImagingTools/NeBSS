@@ -39,6 +39,9 @@ def SegT2(config):
     parent =  config["parent_dir"]
     env = os.environ.copy()
     env['nebss_config'] = config_file
+    # If we ever decide to run test parameters from command line
+    # change this part.
+    env['nebss_test'] = "False"
     reg = os.path.abspath(local_path+'/NeBSS/struct/segment_T2.py')
     cmd = 'ipython '+ reg
     task = shlex.split(cmd)
