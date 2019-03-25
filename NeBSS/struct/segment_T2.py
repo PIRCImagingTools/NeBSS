@@ -94,12 +94,12 @@ T2warpTemplate=pe.Node(interface=ants.ANTS(), name='T2warpTemplate')
 T2warpTemplate.inputs.dimension=3
 T2warpTemplate.inputs.metric=['CC',]
 T2warpTemplate.inputs.metric_weight=[1.0,]
-T2warpTemplate.inputs.radius=[10,]
+T2warpTemplate.inputs.radius=[5,]
 T2warpTemplate.inputs.output_transform_prefix='ANTS_OUT'
 T2warpTemplate.inputs.transformation_model='SyN'
-T2warpTemplate.inputs.gradient_step_length=5
-T2warpTemplate.inputs.number_of_time_steps=5
-T2warpTemplate.inputs.delta_time=0.01
+T2warpTemplate.inputs.gradient_step_length=25
+T2warpTemplate.inputs.number_of_time_steps=3
+T2warpTemplate.inputs.delta_time=0.05
 T2warpTemplate.inputs.regularization='Gauss'
 T2warpTemplate.inputs.regularization_gradient_field_sigma=0
 T2warpTemplate.inputs.regularization_deformation_field_sigma=3
@@ -107,7 +107,7 @@ T2warpTemplate.inputs.regularization_deformation_field_sigma=3
 if isTest == "True":
 	T2warpTemplate.inputs.number_of_iterations=[2,2,2,1] #test parameters
 else:
-	T2warpTemplate.inputs.number_of_iterations=[100,100,100,50]
+	T2warpTemplate.inputs.number_of_iterations=[100,100,100,100]
 
 T2warpTemplate.config = {'execution':
                          {'remove_unnuecessary_outputs' : False}
@@ -214,9 +214,9 @@ albert_warp.inputs.metric_weight=[1.0,]
 albert_warp.inputs.radius=[10,]
 albert_warp.inputs.output_transform_prefix='ANTS_OUT'
 albert_warp.inputs.transformation_model='SyN'
-albert_warp.inputs.gradient_step_length=5
-albert_warp.inputs.number_of_time_steps=5
-albert_warp.inputs.delta_time=0.01
+albert_warp.inputs.gradient_step_length=25
+albert_warp.inputs.number_of_time_steps=3
+albert_warp.inputs.delta_time=0.05
 albert_warp.inputs.regularization='Gauss'
 albert_warp.inputs.regularization_gradient_field_sigma=0
 albert_warp.inputs.regularization_deformation_field_sigma=3
@@ -224,7 +224,7 @@ albert_warp.inputs.regularization_deformation_field_sigma=3
 if isTest == "True":
 	albert_warp.inputs.number_of_iterations=[2,2,2,1] #test parameters
 else:
-	albert_warp.inputs.number_of_iterations=[100,100,100,50]
+	albert_warp.inputs.number_of_iterations=[100,100,100,100]
 
 albert_warp.config = {'execution':
                          {'remove_unnuecessary_outputs' : False}
