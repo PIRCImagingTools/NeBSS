@@ -24,7 +24,8 @@ RUN apt-get update && apt-get install --no-install-recommends -y\
     # pip
     && pip install \
     nipy==0.4.2 \
-    nipype==1.1.7 
+    nipype==1.1.7 \
+    matplotlib==2.1.1 
 
 #development tools (can be removed for deployment)
 #RUN apt-get update && apt-get install --no-install-recommends -y \
@@ -37,15 +38,17 @@ RUN apt-get update && apt-get install --no-install-recommends -y\
 EXPOSE 80
 
 #Set up environment
-RUN echo "FSLDIR=/usr/share/fsl/5.0\n. \${FSLDIR}/etc/fslconf/fsl.sh\nPATH=\${FSLDIR}/bin:\${PATH}\nexport FSLDIR PATH\nalias jlab=\"jupyter lab --ip=0.0.0.0 --allow-root\"" >> /etc/bash.bashrc
+RUN echo "FSLDIR=/usr/share/fsl/5.0\n. \${FSLDIR}/etc/fslconf/fsl.sh\nPATH=\${FSLDIR}/bin:\${PATH}\nexport FSLDIR PATH\nalias jlab=\"jupyter lab --ip=0.0.0.0 --allow-root\"" >> /root/.bashrc
 
 
 #Copy in code - make this one of the last layers to make build process more efficient
 COPY . /app
 
 # Command to run at startup
+# run with docker run -v /path/to/data:/data 
 WORKDIR /data
 ENTRYPOINT ["python", "/app/nebss_cl.py"]
+
 
 
 

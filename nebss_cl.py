@@ -43,9 +43,9 @@ def SegT2(config):
     # change this part.
     env['nebss_test'] = "False"
     reg = os.path.abspath(local_path+'/NeBSS/struct/segment_T2.py')
-    cmd = 'ipython '+ reg
+    cmd = 'python '+ reg
     task = shlex.split(cmd)
-#    print(task)
+    print(task)
     subprocess.call(task, env=env)
     print "Segmentation done!\n"+\
     'Please check:\n'+\
