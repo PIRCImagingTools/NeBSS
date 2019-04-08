@@ -28,17 +28,24 @@ RUN apt-get update && apt-get install --no-install-recommends -y\
     matplotlib==2.1.1 
 
 #development tools (can be removed for deployment)
-#RUN apt-get update && apt-get install --no-install-recommends -y \
-#    vim\
+RUN apt-get update && apt-get install --no-install-recommends -y \
+    vim
 #    && pip install \
 #    jupyter \
 #    jupyterlab \ 
-#    && rm -rf /var/lib/apt/lists/*
+#    && rm -rf /var/lib/apt/lists/* 
+# EXPOSE 80
 
-EXPOSE 80
-
-#Set up environment
-RUN echo "FSLDIR=/usr/share/fsl/5.0\n. \${FSLDIR}/etc/fslconf/fsl.sh\nPATH=\${FSLDIR}/bin:\${PATH}\nexport FSLDIR PATH\nalias jlab=\"jupyter lab --ip=0.0.0.0 --allow-root\"" >> /root/.bashrc
+#Set up environment &&
+# create Initializing startup script to set up bash environment
+RUN echo \
+"#!/bin/bash\n\
+FSLDIR=/usr/share/fsl/5.0\n\
+. \${FSLDIR}/etc/fslconf/fsl.sh\n\
+PATH=\${FSLDIR}/bin:\${PATH}\n\
+export FSLDIR PATH\n\
+alias jlab=\"jupyter lab --ip=0.0.0.0 --allow-root\"\n\
+exec python /app/nebss_cl.py \"\$@\"" >> /startup.sh
 
 
 #Copy in code - make this one of the last layers to make build process more efficient
@@ -46,8 +53,10 @@ COPY . /app
 
 # Command to run at startup
 # run with docker run -v /path/to/data:/data 
+# Full command (can be aliased):
+# docker run -it --user=$UID:$UID -v $(pwd):/data <container_name> <config file>
 WORKDIR /data
-ENTRYPOINT ["python", "/app/nebss_cl.py"]
+ENTRYPOINT ["/bin/bash", "/startup.sh"]
 
 
 
