@@ -1,3 +1,4 @@
 *.pyc
-template_config.json
+template_config.json*
 stat_result.json
+template_config.json.EXAMPLE
