@@ -24,7 +24,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y\
 # pip
     && pip install \
     nipy==0.4.2 \
-    nipype==1.1.7 \
+    nipype==0.14.0 \
     matplotlib==2.1.1 
 
 #development tools (can be removed for deployment)
@@ -38,6 +38,9 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 
 #Set up environment &&
 # create Initializing startup script to set up bash environment
+RUN echo "docker:1001:1001::/bin/bash" >> /etc/passwd &&\
+    echo "docker:x:1001" >> /etc/group
+
 RUN echo \
 "#!/bin/bash \n \
 FSLDIR=/usr/share/fsl/5.0 \n \
