@@ -1,9 +1,9 @@
 import nipype.interfaces.io as nio
 import nipype.interfaces.fsl as fsl
-import  ants_ext as ants
+import ants_ext as ants
 import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as util
-import os,json, sys
+import os, json, sys
 import time
 import fast_thresh
 from nipype import config
@@ -39,17 +39,17 @@ pid = cfg['pid']
 Atlas2 = atlas_dirs['NeonatalAtlas2_DIR']
 ALBERT = atlas_dirs['ALBERT_DIR']
 
-T2_Template =os.path.abspath(Atlas2 + 'template_T2.nii.gz')
+T2_Template = os.path.abspath(Atlas2 + 'template_T2.nii.gz')
 
 tissuelist = ['brainstem.nii.gz', 'cerebellum.nii.gz',
               'cortex.nii.gz', 'csf.nii.gz', 'dgm.nii.gz',
               'wm.nii.gz', 'brainmask.nii.gz',
-              'itcsf.nii.gz','ivcsf.nii.gz','stcsf.nii.gz']
+              'itcsf.nii.gz', 'ivcsf.nii.gz', 'stcsf.nii.gz']
 
 TissueList = [os.path.abspath(Atlas2) +'/'+
                tissue for tissue in tissuelist]
 
-config.set('execution','crashdump_dir',parent_dir)
+config.set('execution', 'crashdump_dir',parent_dir)
 
 
 cropT2 = pe.Node(interface=fsl.ExtractROI(), name = 'cropT2')
@@ -137,7 +137,7 @@ apply_T2_warp.inputs.invert_affine = [1,]
 apply_T2_warp_agg = pe.Node(name='apply_T2_warp_agg',
                     interface = util.Function(input_names=['warp','affine'],
                                          output_names=['trans_series'],
-                                         function = inv_agg_transforms))
+                                         function=inv_agg_transforms))
 
 get_masks = pe.MapNode(interface=fsl.ExtractROI(), name = 'get_masks',
                               iterfield=['in_file'])
@@ -164,10 +164,10 @@ albert_group = cfg['albert_group']
 def get_albert_group(group,local_path,ALBERT):
     import os
     groups = {
-        '<27':['06','09','15','17','18'],
-        '27-30':['08','10','11','12','14','20'],
-        '30-36':['07','13','16','19'],
-        'Term':['01','02','03','04','05']
+        '<27': ['06','09','15','17','18'],
+        '27-30': ['08','10','11','12','14','20'],
+        '30-36': ['07','13','16','19'],
+        'Term': ['01','02','03','04','05']
     }
     return [os.path.abspath(ALBERT +'volumes/{0}_T2_brain.nii.gz'.format(x))
                               for x in groups[group]]

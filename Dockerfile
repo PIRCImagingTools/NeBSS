@@ -39,13 +39,21 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 #Set up environment &&
 # create Initializing startup script to set up bash environment
 RUN echo \
-"#!/bin/bash\n\
-FSLDIR=/usr/share/fsl/5.0\n\
-. \${FSLDIR}/etc/fslconf/fsl.sh\n\
-PATH=\${FSLDIR}/bin:\${PATH}\n\
-export FSLDIR PATH\n\
-alias jlab=\"jupyter lab --ip=0.0.0.0 --allow-root\"\n\
-exec python /app/nebss_cl.py \"\$@\"" >> /startup.sh
+"#!/bin/bash \n \
+FSLDIR=/usr/share/fsl/5.0 \n \
+. \${FSLDIR}/etc/fslconf/fsl.sh \n \
+PATH=\${FSLDIR}/bin:\${PATH} \n \
+export FSLDIR PATH \n\
+alias jlab=\"jupyter lab --ip=0.0.0.0 --allow-root\" \n \
+if [ -f \"\$@\" ]; then \
+exec python /app/nebss_cl.py \"\$@\"; \
+else  \n \
+echo \"No config file found. Entering debug mode. \n \
+To view nipype crash file: \n \
+nipypecli crash <crash file> \n \
+Exit with CTRL+D \" \n \
+bash \n \
+fi" >> /startup.sh
 
 
 #Copy in code - make this one of the last layers to make build process more efficient
@@ -57,8 +65,6 @@ COPY . /app
 # docker run -it --user=$UID:$UID -v $(pwd):/data <container_name> <config file>
 WORKDIR /data
 ENTRYPOINT ["/bin/bash", "/startup.sh"]
-
-
-
+CMD [""]
 
 
