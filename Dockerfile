@@ -21,7 +21,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y\
     && rm -rf /usr/share/fsl/5.0/data\ 
     && rm -rf /usr/share/fsl/data\ 
     && rm -rf /var/lib/apt/lists/*\ 
-    # pip
+# pip
     && pip install \
     nipy==0.4.2 \
     nipype==1.1.7 \
