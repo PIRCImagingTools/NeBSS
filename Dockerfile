@@ -45,17 +45,24 @@ RUN echo \
 FSLDIR=/usr/share/fsl/5.0 \n \
 . \${FSLDIR}/etc/fslconf/fsl.sh \n \
 PATH=\${FSLDIR}/bin:\${PATH} \n \
-export FSLDIR PATH \n\
-alias jlab=\"jupyter lab --ip=0.0.0.0 --allow-root\" \n \
-if [ -f \"\$@\" ]; then \
-exec python /app/nebss_cl.py \"\$@\"; \
-else  \n \
-echo \"No config file found. Entering debug mode. \n \
+export FSLDIR PATH \n \
+case \"\$1\" in \n \
+config) \n \
+exec python /app/create_config.py \"\$2\" \n \
+;; \n \
+*config.json) \n \
+exec python /app/nebss_cl.py \"\$@\" \n \
+;; \n \
+*)  \n \
+echo \"No config or image file found. Entering command mode. \n \
+To create a config file: \n \
+<NeBSS_Command> config <input_image.nii.gz> \n\n \
 To view nipype crash file: \n \
 nipypecli crash <crash file> \n \
 Exit with CTRL+D \" \n \
 bash \n \
-fi" >> /startup.sh
+;; \n \
+esac" >> /startup.sh
 
 #Copy in code - make this one of the last layers to make build process more efficient
 COPY . /app
