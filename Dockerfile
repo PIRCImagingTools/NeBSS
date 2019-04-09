@@ -17,14 +17,16 @@ RUN apt-get update && apt-get install --no-install-recommends -y\
     fsl-5.0-core=5.0.9*\
     ants=2.2.0*\
     graphviz=2.40.1*\
-    python-wxgtk3.0=3.0.2.0*\
+#    python-wxgtk3.0=3.0.2.0*\
     && rm -rf /usr/share/fsl/5.0/data\ 
     && rm -rf /usr/share/fsl/data\ 
     && rm -rf /var/lib/apt/lists/*\ 
 # pip
     && pip install \
+    networkx==1.11 \
+    traits==4.6.0 \
     nipy==0.4.2 \
-    nipype==0.14.0 \
+    nipype==1.1.9 \
     matplotlib==2.1.1 
 
 #development tools (can be removed for deployment)
@@ -38,8 +40,8 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 
 #Set up environment &&
 # create Initializing startup script to set up bash environment
-RUN echo "docker:1001:1001::/bin/bash" >> /etc/passwd &&\
-    echo "docker:x:1001" >> /etc/group
+#RUN echo "rafa:x:1000:1000:rafa,,,:/home/rafa:/bin/bash" >> /etc/passwd &&\
+#    echo "rafa:x:1000" >> /etc/group
 
 RUN echo \
 "#!/bin/bash \n \
@@ -58,13 +60,15 @@ Exit with CTRL+D \" \n \
 bash \n \
 fi" >> /startup.sh
 
+#RUN groupadd -r docker && useradd --no-log-init -r -g docker docker && \
+#usermod -a -G root docker
+#USER docker:docker
 
 #Copy in code - make this one of the last layers to make build process more efficient
 COPY . /app
 
 # Command to run at startup
-# run with docker run -v /path/to/data:/data 
-# Full command (can be aliased):
+# run with: 
 # docker run -it --user=$UID:$UID -v $(pwd):/data <container_name> <config file>
 WORKDIR /data
 ENTRYPOINT ["/bin/bash", "/startup.sh"]

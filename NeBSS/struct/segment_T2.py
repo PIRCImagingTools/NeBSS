@@ -1,6 +1,7 @@
 import nipype.interfaces.io as nio
 import nipype.interfaces.fsl as fsl
 import ants_ext as ants
+#import nipype.interfaces.ants as ants
 import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as util
 import os, json, sys
@@ -211,7 +212,7 @@ albert_warp=pe.MapNode(interface=ants.ANTS(),
 albert_warp.inputs.dimension=3
 albert_warp.inputs.metric=['CC',]
 albert_warp.inputs.metric_weight=[1.0,]
-albert_warp.inputs.radius=[10,]
+albert_warp.inputs.radius=[5,]
 albert_warp.inputs.output_transform_prefix='ANTS_OUT'
 albert_warp.inputs.transformation_model='SyN'
 albert_warp.inputs.gradient_step_length=25
