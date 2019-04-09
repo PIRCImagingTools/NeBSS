@@ -47,7 +47,7 @@ def SegT2(config):
     task = shlex.split(cmd)
     print(task)
     subprocess.call(task, env=env)
-    print "Segmentation done!\n"+\
+    print "Finished Running\n"+\
     'Please check:\n'+\
     parent + '/SegT2/Outputs/OutFiles.nii.gz\n'+\
     'For any registration errors'
