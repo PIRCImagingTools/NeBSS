@@ -50,7 +50,8 @@ def save_dict(dct, filename):
 if __name__ == "__main__":
     infile = sys.argv[1]
     if not os.path.isfile(os.path.abspath(infile)):
-        print("File does not exist. Are you in the correct directory?")
+        print("File: {0} does not exist. Are you in the correct directory?".format(
+        infile))
     else:
         out_config = {}
         print("Creating config file for input image:\n{0}".format(infile))
