@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y\
 
 #Container specific dependencies
 RUN apt-get update && apt-get install --no-install-recommends -y\
-    fsl-5.0-core=5.0.9*\
+    fsl-5.0=5.0.9*\
     ants=2.2.0*\
     graphviz=2.40.1*\
     && rm -rf /var/lib/apt/lists/*\ 
