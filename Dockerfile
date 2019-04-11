@@ -36,41 +36,16 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 #    && rm -rf /var/lib/apt/lists/* 
 # EXPOSE 80
 
-#Set up environment &&
-# create Initializing startup script to set up bash environment
-
-RUN echo \
-"#!/bin/bash \n \
-FSLDIR=/usr/share/fsl/5.0 \n \
-. \${FSLDIR}/etc/fslconf/fsl.sh \n \
-PATH=\${FSLDIR}/bin:\${PATH} \n \
-export FSLDIR PATH \n \
-case \"\$1\" in \n \
-config) \n \
-exec python /app/create_config.py \"\$2\" \n \
-;; \n \
-*config.json) \n \
-exec python /app/nebss_cl.py \"\$@\" \n \
-;; \n \
-*)  \n \
-echo \"No config or image file found. Entering command mode. \n \
-To create a config file: \n \
-<NeBSS_Command> config <input_image.nii.gz> \n\n \
-To view nipype crash file: \n \
-nipypecli crash <crash file> \n \
-Exit with CTRL+D \" \n \
-bash \n \
-;; \n \
-esac" >> /startup.sh
-
 #Copy in code - make this one of the last layers to make build process more efficient
 COPY . /app
 
 # Command to run at startup
 # run with: 
 # docker run -it --user=$UID:$UID -v $(pwd):/data <container_name> <config file>
+# Tip: Set up a bashrc function:
+# function NeBSS { docker run -it --user=$UID:$UID -v $(pwd):/data <container_name> "$@"; }
 WORKDIR /data
-ENTRYPOINT ["/bin/bash", "/startup.sh"]
+ENTRYPOINT ["/bin/bash", "/app/startup.sh"]
 CMD [""]
 
 
