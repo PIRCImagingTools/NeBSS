@@ -59,9 +59,11 @@ Two options to make NeBSS Docker image.
 Creating a NeBSS Function
 ---------------------------------------
 
-    1. Helpful tip to run NeBSS Docker Image is to add a function to ${HOME}/.bashrc:            'function NeBSS {docker run -it --user=$UID:$UID -v $(pwd):/data nebss_prod "$@"; }'
+    1. Helpful tip to run NeBSS Docker Image is to add a function to ${HOME}/.bashrc:
+        'function NeBSS {docker run -it --user=$UID:$UID -v $(pwd):/data nebss_prod "$@"; }'
 
-    2. From here forward, we will use the 'NeBSS' function to run. You can replace any instance of 'NeBSS' from here out with 'docker run -it --user=$UID:$UID -v $(pwd):/data nebss_prod' and the result will be the same.  
+    2. From here forward, documentation will use the 'NeBSS' function to run. You can replace any instance of 'NeBSS' from here out with
+        'docker run -it --user=$UID:$UID -v $(pwd):/data nebss_prod' and the result will be the same.  
 
 Running NeBSS - Step-by-step guide
 ---------------------------------------
