@@ -9,19 +9,7 @@ Dependencies
 ------------
 The following software must be installed first:
 
-- fsl
-- ants 
-
-Get these from pip (rather than apt-get on Debian)
-- nipy
-- nipype
-
-
-CONFIGURATION
---------------
-Add to config file the location of your ALBERT atlas directories
--- Downloaded from source
-
+- docker-ce
 
 RUNNING
 ----------
@@ -29,10 +17,6 @@ RUNNING
 From github:
 
 git pull https://github.com/PIRCImagingTools/NeBSS
-
-cd into directory (or add sortcut)
-
-python nebss_gui.py
 
 
 Input: T2 weighted scans, in nifty format T1 input will also work but is more of a work 
