@@ -1,0 +1,65 @@
+################################################
+# ITK-SnAP Label Description File
+# File format: 
+# IDX   -R-  -G-  -B--  VIS MSH  LABEL
+# Fields: 
+#    IDX:   Zero-based index 
+#    -R-:   Red color component (0..255)
+#    -G-:   Green color component (0..255)
+#    -B-:   Blue color component (0..255)
+#    -A-:   Label transparency (0.00 .. 1.00)
+#    VIS:   Label visibility (0 or 1)
+#    IDX:   Label mesh visibility (0 or 1)
+#  LABEL:   Label description 
+################################################ 
+    0     0    0    0        0  0  0    "Clear Label" 
+    1   255    0    0        1  1  1    "Hippocampus left"
+    2	  0  255    0	     1  1  1    "Hippocampus right"
+    3	255  255    0	     1  1  1    "Amygdala left"
+    4	  0    0  255	     1  1  1    "Amygdala right"
+    5	255  255  255	     1  1  1    "Anterior temporal lobe, medial part left"
+    6	255  255  255	     1  1  1    "Anterior temporal lobe, medial part right"
+    7	255    0    0	     1  1  1    "Anterior temporal lobe, lateral part left"
+    8	255  255  255	     1  1  1    "Anterior temporal lobe, lateral part right"
+    9	  7  255    7	     1  1  1    "Gyri parahippocampalis et ambiens anterior part left"
+   10	255  255    7	     1  1  1    "Gyri parahippocampalis et ambiens anterior part right"
+   11	  7   72   55	     1  1  1    "Superior temporal gyrus, middle part left"
+   12	255   72   55	     1  1  1    "Superior temporal gyrus, middle part right"
+   13	  7  255  255	     1  1  1    "Medial and inferior temporal gyri anterior part left"
+   14	248  248  248	     1  1  1    "Medial and inferior temporal gyri anterior part right"
+   15	255   14   14	     1  1  1    "Lateral occipitotemporal gyrus, gyrus fusiformis anterior part left"
+   16	 14  255   14	     1  1  1    "Lateral occipitotemporal gyrus, gyrus fusiformis anterior part right"
+   17	255  255   14	     1  1  1    "Cerebellum left"
+   18	 14   14  255	     1  1  1    "Cerebellum right"
+   19	255   14  255	     1  1  1    "Brainstem, spans the midline"
+   20	 14  255  255	     1  1  1    "Insula right"
+   21	241  241  241        1  1  1	"Insula left"
+   22	255   21   21        1  1  1	"Occipital lobe right"
+   23	 21  255   21        1  1  1	"Occipital lobe left"
+   24	255  255   21        1  1  1	"Gyri parahippocampalis et ambiens posterior part right"
+   25	 21   21  255	     1  1  1    "Gyri parahippocampalis et ambiens posterior part left"
+   26	255   21  255	     1  1  1    "Lateral occipitotemporal gyrus, gyrus fusiformis posterior part right"
+   27	 21  255  255	     1  1  1    "Lateral occipitotemporal gyrus, gyrus fusiformis posterior part left"
+   28	234  234  234	     1  1  1    "Medial and inferior temporal gyri posterior part right"
+   29	255   28   28	     1  1  1    "Medial and inferior temporal gyri posterior part left"
+   30	 28  255   28	     1  1  1    "Superior temporal gyrus, posterior part right"
+   31	255  255   28	     1  1  1    "Superior temporal gyrus, posterior part left"
+   32	 28   28  255	     1  1  1    "Cingulate gyrus, anterior part right"
+   33	255   28  255	     1  1  1    "Cingulate gyrus, anterior part left"
+   34	 28   22  227	     1  1  1    "Cingulate gyrus, posterior part right"
+   35   101   54   73        1  1  1    "Cingulate gyrus, posterior part left"
+   36	255   35   35	     1  1  1    "Frontal lobe right"
+   37	 35  255   35	     1  1  1    "Frontal lobe left"
+   38	255  255   35	     1  1  1    "Parietal lobe right"
+   39	 35   35  255	     1  1  1    "Parietal lobe left"
+   40	255   35  255	     1  1  1    "Caudate nucleus right"
+   41	 35  255  255	     1  1  1    "Caudate nucleus left"
+   42	220  220  220	     1  1  1    "Thalamus right"
+   43	255   42   42	     1  1  1    "Thalamus left"
+   44	 42  255   42	     1  1  1    "Subthalamic nucleus right"
+   45	255  255   42	     1  1  1    "Subthalamic nucleus left"
+   46	 42   42  255	     1  1  1    "Lentiform Nucleus right"
+   47	255   42  255	     1  1  1    "Lentiform Nucleus left"
+   48	 42  255  255	     1  1  1    "Corpus Callosum"
+   49	213  213  213	     1  1  1    "Lateral Ventricle left"
+   50	255   49   49	     1  1  1    "Lateral Ventricle right"

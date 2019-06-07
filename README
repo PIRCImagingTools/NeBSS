@@ -43,41 +43,74 @@ dcm2niix - software to convert dicom to nifti format,
 documentation https://www.nitrc.org/plugins/mwiki/index.php/dcm2nii:MainPage
 download https://github.com/rordenlab/dcm2niix.
 
-Output: Albert_wta.nii = nifti segmentation masks
-Step-by-step guide
-1.Create a new parent folder for each case for the output
-
-mkdir <casename>
 
 
-2. Run NeBSS
+Two options to make NeBSS Docker image. 
+---------------------------------------
 
-nebss_gui.py
+     1. Building NeBSS image from Dockerfile. 
+            1. Within NeBSS folder run docker build command: 
+                'docker build -t nebss_prod:latest .'
 
-3. a. This will open a graphic user interface
+    2. Importing NeBSS image from pre-built image
+            1. Download image and move to folder with image. 
+            2. Docker import <image.tar> nebss_prod:latest -nebss_prod:latest
 
-PID = <patID>, PCA = post conceptional age in weeks, choose Albert group (early preterm, late preterm, term)
-Parent Dir: path/to/parent/folder/<casename>
-Struct T2: path/to/inputfile/T2.nii
+Creating a NeBSS Function
+---------------------------------------
 
-Define cropping dimensions: open T2.nii file in fsleyes to define boundaries:
+    1. Helpful tip to run NeBSS Docker Image is to add a function to ${HOME}/.bashrc:
+        'function NeBSS {docker run -it --user=$UID:$UID -v $(pwd):/data nebss_prod "$@"; }'
 
-You want the Voxel Location, which is the grid coordinate of the voxel, ranging from 0 to total number of voxels in that direction (positive numbers, X1 is always smaller than X2).
-No definite convention exists, but: coronal acquired usually: X=RL, Y=IS, Z=AP,  sagitally acquired usually: X=AP, Y=IS, Z=RL for example. Z is usually the image "slices". MNI space is: X = RL, Y=AP, Z=IS.
+    2. From here forward, documentation will use the 'NeBSS' function to run. You can replace any instance of 'NeBSS' from here out with
+        'docker run -it --user=$UID:$UID -v $(pwd):/data nebss_prod' and the result will be the same.  
 
-NOTE: The scanner/anatomical coordinates start with 0 in the center of the volume, and will go positive/negative moving away from that. You don't want these coordinates. 
-see: https://itk.org/Wiki/File:DICOM-OrientationDiagram-LPS.png
+Running NeBSS - Step-by-step guide
+---------------------------------------
+
+    1. Create a new parent folder for each case for the output
+        mkdir <casename>
+
+    2. Create config file using
+        'NeBSS config <image file>
+        
+        Answer config setup questions as follows: 
+
+            1. PID = <patID>, 
+
+            2. T2 Weighted? = Is image T2 Y/N
+            
+            3. Crop Coordiates: Use viewing software like fsleyes to determine MR boundaries. 
+                You want the Voxel Location, which is the grid coordinate of the voxel, ranging from 0 to total number of voxels in that direction (positive numbers, X1 is always smaller than X2).
+
+            4. Image Center = Divide Coordinate locations by 2. 
+                Example: x0=0, x1=100, x-center=50
+
+            5. Albert group: (early preterm, late preterm, term)
+
+            6. PCA = post conceptional age in weeks, 
+            
+            Notes: 
+                No definite convention exists, but: coronal acquired usually: X=RL, Y=IS, Z=AP,  sagitally acquired usually: X=AP, Y=IS, Z=RL for example. Z is usually the image "slices". MNI space is: X = RL, Y=AP, Z=IS.
+
+                The scanner/anatomical coordinates start with 0 in the center of the volume, and will go positive/negative moving away from that. You don't want these coordinates. 
+                    see: https://itk.org/Wiki/File:DICOM-OrientationDiagram-LPS.png
 
 
-If your input is a T1 or the FSE is >3mm, use T1 image and add FSE and run RegFSE and use the output as input for structural T2.
+                If your input is a T1 or the FSE is >3mm, use T1 image and add FSE and run RegFSE and use the output as input for structural T2.
 
-b. Save config before running
 
-c. Click T2seg to run segmentation (this will take about 20h)
+    3. Run NeBSS using command
+        'NeBSS <relative/path/to/config.json>
 
-Quick check: Segmentation.png
+After Running:
+---------------------------------------
 
-Output folder: <casename>/SegT2/Outputs/ 
+    Quick check: Segmentation.png
 
-Check the output in fsleyes: the segmentation will be the Albert_wta file, overlayed on the T2_bias_corrected image
+    Output folder: <casename>/SegT2/Outputs/ 
+
+    Output: Albert_wta.nii = nifti segmentation masks
+
+    Check the output in fsleyes: the segmentation will be the Albert_wta file, overlayed on the T2_bias_corrected image
 
