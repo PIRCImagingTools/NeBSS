@@ -12,7 +12,11 @@ exec python /app/create_config.py "$2"
 *config.json)
 exec python /app/nebss_cl.py "$@" 
 ;;
-*) 
+*.nii*)
+config_file=$(exec python /app/generate_config.py "$@")
+exec python  /app/nebss_cl.py "$config_file"
+;;
+*)
 echo "No config or image file found. Entering command mode. 
 
 To create a config file: 
