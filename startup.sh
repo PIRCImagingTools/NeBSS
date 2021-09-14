@@ -7,10 +7,10 @@ export FSLDIR PATH
 
 case "$1" in 
 config)
-exec python /app/create_config.py "$2" 
+eval python /app/create_config.py "$2" 
 ;;
 *config.json)
-exec python /app/nebss_cl.py "$@" 
+eval python /app/nebss_cl.py "$@" 
 ;;
 *.nii*)
 eval python /app/generate_config.py "$@"
