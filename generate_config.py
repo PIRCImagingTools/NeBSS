@@ -46,7 +46,7 @@ def generate_config(path, subj_id, subj_pma):
 
 
     if contrast == 'T1':
-        t1_struc = join('data',file_base)
+        t1_struc = join(data_folder,file_base)
         t1_coord = get_coords(out_file_bin)
         t2_struc = ""
         t2_coord = get_coords(t2_struc)
@@ -81,9 +81,6 @@ def generate_config(path, subj_id, subj_pma):
 
     os.remove(out_file)
     os.remove(out_file_bin)
-
-    print(subj_id +  '_config.json')
-
 
 
 def determine_contrast(path):
