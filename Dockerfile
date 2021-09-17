@@ -18,14 +18,12 @@ RUN apt-get update && apt-get install --no-install-recommends -y\
     fsl-mni152-templates=5.0.7*\
     ants=2.2.0*\
     graphviz=2.40.1*\
-    && rm -rf /var/lib/apt/lists/* 
-
-RUN pip install setuptools==44.*
+    && rm -rf /var/lib/apt/lists/*\ 
 # pip
-RUN pip install \
+    && pip install \
     networkx==1.11 \
-    traits==4.6.0  \ 
-    nipy==0.4.2  \ 
+    traits==4.6.0 \
+    nipy==0.4.2 \
     nipype==1.1.9 \
     matplotlib==2.1.1 
 
