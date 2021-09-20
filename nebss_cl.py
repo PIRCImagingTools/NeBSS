@@ -1,5 +1,5 @@
 from __future__ import unicode_literals
-import os, shlex, subprocess, json, sys
+import os, shlex, subprocess, json, sys, re
 """
 Usage:
     add to bash config:
@@ -33,7 +33,7 @@ def LoadConfig(config_file):
         else:
             print("Config file not found")
 
-def SegT2(config):
+def Segment(config):
     config = LoadConfig(config_file)
     local_path = determine_path()
     parent =  config["parent_dir"]
@@ -42,20 +42,25 @@ def SegT2(config):
     # If we ever decide to run test parameters from command line
     # change this part.
     env['nebss_test'] = "False"
-    reg = os.path.abspath(local_path+'/NeBSS/struct/segment_T2.py')
+
+    if config['T1_struct'] == "":
+        reg = os.path.abspath(local_path+'/NeBSS/struct/segment_T2.py')
+        contrast='T2'
+    else:
+        reg = os.path.abspath(local_path+'/NeBSS/struct/segment_T1.py')
+        contrast='T1'
+    
     cmd = 'python '+ reg
     task = shlex.split(cmd)
     print(task)
     subprocess.call(task, env=env)
-    print "Finished Running\n"+\
-    'Please check:\n'+\
-    parent + '/SegT2/Outputs/OutFiles.nii.gz\n'+\
-    'For any registration errors'
-
+    print ('Finished Running\n Please check:\n' + parent + \
+        '/Seg' + contrast + '/Outputs/OutFiles.nii.gz\n'+ \
+        'For any registration errors')
 
 if __name__ == "__main__":
 
     config_file = os.path.abspath(sys.argv[1])
-    SegT2(config_file)
+    Segment(config_file)
 
 
