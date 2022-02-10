@@ -43,20 +43,27 @@ def Segment(config):
     # change this part.
     env['nebss_test'] = "False"
 
-    if config['T1_struct'] == "":
-        reg = os.path.abspath(local_path+'/NeBSS/struct/segment_T2.py')
-        contrast='T2'
-    else:
-        reg = os.path.abspath(local_path+'/NeBSS/struct/segment_T1.py')
-        contrast='T1'
+    try:
+        if 'T2_struct' in config and config['T2_struct'] != "":
+            reg = os.path.abspath(local_path+'/NeBSS/struct/segment_T2.py')
+            contrast='T2'
+        elif 'T1_struct' in config and config['T1_struct'] != "":
+            reg = os.path.abspath(local_path+'/NeBSS/struct/segment_T1.py')
+            contrast='T1'
+
     
-    cmd = 'python '+ reg
-    task = shlex.split(cmd)
-    print(task)
-    subprocess.call(task, env=env)
-    print ('Finished Running\n Please check:\n' + parent + \
-        '/Seg' + contrast + '/Outputs/OutFiles.nii.gz\n'+ \
-        'For any registration errors')
+        cmd = 'python '+ reg
+        task = shlex.split(cmd)
+        print(task)
+        subprocess.call(task, env=env)
+        print ('Finished Running\n Please check:\n' + parent + \
+            '/Seg' + contrast + '/Outputs/OutFiles.nii.gz\n'+ \
+            'For any registration errors')
+    except NameError:
+        print("\n\tUnknown which contrast version to run")
+        print("\tPlease check config and rerun\n")
+    except Exception as e:
+        print("Error Occured:\n{}".format(str(e)))
 
 if __name__ == "__main__":
 
