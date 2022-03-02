@@ -224,8 +224,7 @@ def get_input_type(arg_type, prompt):
                 run = False
 
 
-
-if __name__ == '__main__':
+def main():
     arg_num = len(sys.argv)
     try:
         if arg_num == 2:
@@ -234,13 +233,18 @@ if __name__ == '__main__':
             generate_config(sys.argv[1], subj_id, subj_pma)
         elif arg_num == 4:
             generate_config(sys.argv[1], sys.argv[2], float(sys.argv[3]))
-    except:
-        pass
+    except ValueError: 
+        msg = "\nSkipping file {}\n".format(sys.argv[1])
+        msg = msg + "Incorrect input for Subject ID or GA\n" 
+        msg = msg + "Subject ID must be string and GA must be float or int\n"
+        print(msg)
+    except Exception as e:
+        msg = "\nSkipping file {}\n".format(sys.argv[1])
+        msg = msg + "Error: {}\n".format(str(e))
+        print(msg)
 
 
-"""
-            subj_id = raw_input("Enter name: ")
-            subj_pma = float(raw_input("Enter PMA: " ))
 
 
-"""
+if __name__ == '__main__':
+    main()
