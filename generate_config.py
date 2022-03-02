@@ -182,11 +182,65 @@ def get_albert_group(subj_pma):
     return albert_group
 
 
+
+def get_input_type(arg_type, prompt):
+    loops = 0
+    expected_types = ['str', 'int', 'float']
+    types = [str, int, float]
+    run = True
+
+    for arg, type_obj in zip(expected_types, types):
+        if arg == arg_type:
+            while run:
+                try:
+                    user_input = type_obj(raw_input(prompt))
+                    if isinstance(user_input, type_obj):
+                        return user_input
+                except KeyboardInterrupt:
+                    run = False
+                except Exception as e:
+                    pass
+                finally:
+                    loops+=1
+                if loops > 5:
+                    run = False
+            break
+
+    if arg_type == 'bool':
+        while run:
+            try:
+                user_input = raw_input(prompt)
+                if user_input.lower() == 'true':
+                    return True
+                elif user_input.lower() == 'false':
+                    return False
+            except KeyboardInterrupt:
+                run = False
+            except Exception as e:
+                pass
+            finally:
+                loops+=1
+            if loops > 5:
+                run = False
+
+
+
 if __name__ == '__main__':
     arg_num = len(sys.argv)
-    if arg_num == 2:
-        subj_id = raw_input("Enter name: ")
-        subj_pma = float(raw_input("Enter PMA: " ))
-        generate_config(sys.argv[1], subj_id, subj_pma)
-    elif arg_num == 4:
-        generate_config(sys.argv[1], sys.argv[2], sys.argv[3])
+    try:
+        if arg_num == 2:
+            subj_id = get_input_type('str', "Enter name: ")
+            subj_pma = get_input_type('float', "Enter PMA: ")
+            generate_config(sys.argv[1], subj_id, subj_pma)
+        elif arg_num == 4:
+            generate_config(sys.argv[1], sys.argv[2], float(sys.argv[3]))
+    except:
+        pass
+
+
+"""
+            subj_id = raw_input("Enter name: ")
+            subj_pma = float(raw_input("Enter PMA: " ))
+
+
+"""
